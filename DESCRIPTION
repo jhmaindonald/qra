@@ -1,0 +1,15 @@
+Package: qra
+Type: Package
+Title: Quantal Respose Analysis For Dose-Mortality Data
+Version: 0.1.16
+Author: John Maindonald
+Maintainer: John Maindonald <john@statsresearch.co.nz>
+Description: Provides utility functions for the analysis
+    of dose-response data.
+License: GPL-3
+Depends: lattice
+Imports: ggplot2, car
+Suggests: knitr, rmarkdown, DAAG, plyr, lme4, robustlmm, MASS
+VignetteBuilder: knitr
+LazyData: TRUE
+RoxygenNote: 6.0.1

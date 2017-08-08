@@ -1,0 +1,6 @@
+This git repository holds the source files for the qra package for R.
+At this point (8 Aug 2017), it is not on CRAN.  The package has utility
+functions and data for use for quantal response analysis, with the
+analysis of insect mortality data from exposure-mortality experiments
+primarily in mind.  "Exposure" may be dose of a fumigant, time in cold
+storage, or another such measure.

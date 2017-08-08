@@ -1,0 +1,79 @@
+---
+title: "Plot MeBr Apple Fumigation Data"
+author: "John Maindonald"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compare Analyses}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r linkfun}
+library(qra)
+require(ggplot2)
+```
+
+## Manipulate data
+```{r plot}
+codling <- DAAG::codling
+num1 <- match(unique(codling$gp),codling$gp)
+rnum <- rep(1, nrow(codling))
+rnum[num1] <- 2
+nnew <- rep(1:nrow(codling),rnum)
+nctl <- match(num1,nnew)
+codling0 <- codling[nnew,]
+codling0[nctl,c('dose','tot','dead','pobs','cm','ct')] <-
+  with(codling0[nctl,], cbind(rep(0,length(num1)), numcm, round(cm*numcm), 
+       cm,rep(NA,length(num1)),rep(0,length(num1))))     
+
+codling0[["logCT"]] <- log(codling0[["ct"]])
+codling0[["Rep"]] <- with(codling0, qra::gpsWithin(gp, list(Cultivar,year)))
+```
+
+# Plot 1988 and 1989 data separately
+```{r y1988, fig.width=6, fig.height=1.75, eval=FALSE}
+library(ggplot2)
+graphSum(df=codling0, subSet=expression(year==1988),
+                     link="cloglog", logScale=TRUE,
+                     dead="dead", tot="tot", dosevar="logCT", Rep="Rep",
+                     fitRep=NULL, fitPanel=NULL,
+                     byFacet=~Cultivar,
+                     maint="Codling moth, MeBr",
+                     xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"))
+```
+
+```{r y1989, fig.width=6, fig.height=2.15, out.width="60%", eval=FALSE}
+graphSum(df=codling0, subSet=expression(year==1989),
+                     link="cloglog", logScale=TRUE,
+                     dead="dead", tot="tot", dosevar="logCT", Rep="Rep",
+                     fitRep=NULL, fitPanel=NULL,
+                     byFacet=~Cultivar,
+                     maint="Codling moth, MeBr",
+                     xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"))
+```
+
+## GLM: quasibinomial link - no ctl mortality adjustment
+```{r GLMquasi}
+cloglog <- linkFunction("cloglog")
+redDel <- subset(codling,
+                 Cultivar=="Red Delicious")
+redDel <- droplevels(redDel)
+   redDel.glm <- glm(pobs~ct, data=redDel, weights=tot,
+                     family=quasibinomial(link='cloglog'))
+   vv <- summary(redDel.glm)$cov.scaled
+   ci <- fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
+print(round(ci,2))
+```   
+   
+Compare with a fit to a 2 df natural spline.
+```{r cf-spline}
+library(splines, quietly=TRUE)
+redDel2.glm <- glm(pobs~ns(ct,2), data=redDel, weights=tot,
+                   family=quasibinomial(link='cloglog'))
+fit2 <- predict(redDel2.glm)
+print(coef(summary(redDel2.glm)), digits=2)
+   vv <- summary(redDel.glm)$cov.scaled
+   ci <- fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
+   print(ci, digits=2)
+```
