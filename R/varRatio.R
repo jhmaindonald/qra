@@ -33,7 +33,7 @@ varRatio <-
     v11 <- vv[1, 1]
     v12 <- -vv[1, 2]
     v22 <- vv[2, 2]
-    g.link <- linkFunction(link)
+    g.link <- stats::make.link(link)[["linkfun"]]
     b <- as.vector(b)
     a <- g.link(phat) - b[1]
     if(b[2]>0){

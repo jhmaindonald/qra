@@ -10,7 +10,7 @@ graphSum(df, subSet = NULL, link = "cloglog", logScale = FALSE,
   maint = "Codling Moth, MeBr", ptSize = 2, xzeroOffsetFrac = 0.08,
   yzeroOneOffsets = c(-0.08, 0.08), yEps = 0.005,
   xlab = expression(bold("CT ") * "(gm.h." * m^{     -3 } * ")"),
-  ytiklab = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
+  ylabel = NULL, ytiklab = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
 }
 \arguments{
 \item{df}{Data frame from which data will be taken}
@@ -20,7 +20,8 @@ graphSum(df, subSet = NULL, link = "cloglog", logScale = FALSE,
 specifies the required data subset.  If not NULL then the subsetting
 information is pasted on after the main title}
 
-\item{link}{Link function, as available from \code{\link{make.link}}}
+\item{link}{Link function. If character, obtain from \code{\link{make.link}}.
+Alternatively, a function may be supplied as argument.}
 
 \item{logScale}{Logical, indicating whether the dose ($x$-variable)
 is on a log scale.}
@@ -57,6 +58,8 @@ mortalities, on the scale of the link function.}
 to accommodate points for mortalities of 0 and 1.}
 
 \item{xlab}{Expression specifying x-axis label}
+
+\item{ylabel}{If not \code{NULL}, $y$-axis label}
 
 \item{ytiklab}{Place $y$ axis tiks and labels at these mortalities}
 }

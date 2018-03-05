@@ -11,7 +11,8 @@
 #' \code{expression(LifeStage=='Eggs')}) that evaluates to a logical that
 #' specifies the required data subset.  If not NULL then the subsetting
 #' information is pasted on after the main title
-#' @param link Link function, as available from \code{\link{make.link}}
+#' @param link Link function. If character, obtain from \code{\link{make.link}}.
+#'   Alternatively, a function may be supplied as argument.
 #' @param logScale Logical, indicating whether the dose ($x$-variable)
 #' is on a log scale.
 #' @param dead Character; name of column holding number dead
@@ -33,6 +34,7 @@
 #' @param yEps Fractional increase at bottom and top of $y$ user range
 #' to accommodate points for mortalities of 0 and 1.
 #' @param xlab Expression specifying x-axis label
+#' @param ylabel If not \code{NULL}, $y$-axis label
 #' @param ytiklab Place $y$ axis tiks and labels at these mortalities
 #'
 #' @import ggplot2
@@ -51,6 +53,7 @@ graphSum <- function(df, subSet=NULL,
                      xzeroOffsetFrac=0.08,
                      yzeroOneOffsets = c(-0.08, 0.08), yEps=0.005,
                      xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"),
+                     ylabel=NULL,
                      ytiklab=c(0.01,0.05,0.1,0.25,0.5,0.75,0.9,0.99)){
   ## Prepare data
   checkNames <- c(dead,tot,dosevar) %in% names(df)
@@ -73,8 +76,13 @@ graphSum <- function(df, subSet=NULL,
     ds <- df
     addtxt <- ""
   }
-  linkFun <- make.link(link)$linkfun
-  ytxt <- paste0("Mortality (", link, " scale)")
+  if(is.character(link)){
+    linkFun <- make.link(link)$linkfun
+    if(is.null(ylabel))ylabel <- paste0("Mortality (", link, " scale)")
+    } else if(is.function(link)){
+      linkFun <- link
+      if(is.null(ylabel))ylabel <- "Mortality"} else
+      stop(paste("Invalid link",link))
   rantot <- range(ds[[tot]])
   pobs <- ds[[dead]]/ds[[tot]]
   numCheck <- c(any(pobs<0), any(pobs>1), rantot[1]<=1)
@@ -140,7 +148,7 @@ graphSum <- function(df, subSet=NULL,
 }
 if(!is.null(byFacet)) gg0 <- gg0+facet_grid(byFacet)
 gg0 <- gg0+
-    xlab(xlab)+ ylab(ytxt)+
+    xlab(xlab)+ ylab(ylabel)+
     ggtitle(paste0(maint, addtxt))+
     theme(axis.title=element_text(size=13,face="bold"),
           axis.text.x = element_text(color = c("brown",rep("black",length(xtik)-1))),

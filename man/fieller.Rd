@@ -2,10 +2,15 @@
 % Please edit documentation in R/fieller.R
 \name{fieller}
 \alias{fieller}
-\title{Confidence limits for LT estimate from dose-response line}
+\alias{fieller2}
+\title{Confidence Limits for LT Estimate from Dose-response Line}
 \usage{
 fieller(phat, b, vv, df.t = Inf, offset = 0, logscale = FALSE,
-  link = "logit", type = c("Fieller", "Delta"), maxg = 0.99)
+  link = "logit", eps = 0, type = c("Fieller", "Delta"), maxg = 0.99)
+
+fieller2(phat, b, vv, df.t = Inf, offset = 0, logscale = FALSE,
+  link = "fpower", lambda = 0, eps = 0, type = c("Fieller", "Delta"),
+  maxg = 0.99)
 }
 \arguments{
 \item{phat}{Mortality proportion}
@@ -29,6 +34,10 @@ from log scale?}
 \item{link}{Link function that transforms expected mortalities
 to the scale of the linear predictor}
 
+\item{eps}{If \code{eps>0} \code{phat} is replaced by
+\eqn{\frac{p+\epsilon}{1+2*\epsilon}} before applying
+the transformation.}
+
 \item{type}{The default is to use Fieller's formula.  A
 generally less preferred alternative is to use the Delta
 (\code{type="Delta"}) method, which relies on a first
@@ -36,10 +45,14 @@ order Taylor series approximation to the variance.}
 
 \item{maxg}{Maximum value of \code{g} for which a
 confidence interval will be calculated. Must be \code{< 1}.}
+
+\item{lambda}{The power \eqn{\lambda}, when using the
+\code{link="fpower"}. (This applies to \code{fieller2}
+only.)}
 }
 \value{
 A vector, with elements
-\item{estval}{Estimate}
+\item{est}{Estimate}
 \item{var}{Variance, calculated using the Delta method}
 \item{lwr}{Lower bound of confidence interval}
 \item{upr}{upper bound of confidence interval}
@@ -50,8 +63,8 @@ be used for normal theory inference.}
 }
 \description{
 This uses Fieller's formula to calculate a confidence
-interval for a specified mortality proportion,
-commonly 0.50, or 0.90, or 0.99
+interval for a specified mortality proportion, commonly
+0.50, or 0.90, or 0.99
 }
 \examples{
 redDel <- subset(DAAG::codling,
@@ -60,6 +73,7 @@ redDel.glm <- glm(pobs~ct, data=redDel,
                   family=quasibinomial(link='cloglog'))
 vv <- summary(redDel.glm)$cov.scaled
 fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
+
 }
 \references{
 Joe Hirschberg & Jenny Lye (2010) A Geometric

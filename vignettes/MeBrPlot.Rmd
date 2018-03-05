@@ -9,12 +9,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r linkfun}
-library(qra)
+```{r linkfun, message=FALSE}
+library(qra, quietly=TRUE)
 require(ggplot2)
 ```
 
-## Manipulate data
+## Plot data
 ```{r plot}
 codling <- DAAG::codling
 num1 <- match(unique(codling$gp),codling$gp)
@@ -32,7 +32,7 @@ codling0[["Rep"]] <- with(codling0, qra::gpsWithin(gp, list(Cultivar,year)))
 ```
 
 # Plot 1988 and 1989 data separately
-```{r y1988, fig.width=6, fig.height=1.75, eval=FALSE}
+```{r y1988, fig.width=7, fig.height=2.5, eval=TRUE, out.width='100%'}
 library(ggplot2)
 graphSum(df=codling0, subSet=expression(year==1988),
                      link="cloglog", logScale=TRUE,
@@ -43,7 +43,7 @@ graphSum(df=codling0, subSet=expression(year==1988),
                      xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"))
 ```
 
-```{r y1989, fig.width=6, fig.height=2.15, out.width="60%", eval=FALSE}
+```{r y1989, fig.width=6.5, fig.height=2.5, out.width="75%", eval=TRUE}
 graphSum(df=codling0, subSet=expression(year==1989),
                      link="cloglog", logScale=TRUE,
                      dead="dead", tot="tot", dosevar="logCT", Rep="Rep",
@@ -54,8 +54,9 @@ graphSum(df=codling0, subSet=expression(year==1989),
 ```
 
 ## GLM: quasibinomial link - no ctl mortality adjustment
+
 ```{r GLMquasi}
-cloglog <- linkFunction("cloglog")
+cloglog <- stats::make.link("cloglog")[["linkfun"]]
 redDel <- subset(codling,
                  Cultivar=="Red Delicious")
 redDel <- droplevels(redDel)
@@ -65,15 +66,107 @@ redDel <- droplevels(redDel)
    ci <- fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
 print(round(ci,2))
 ```   
-   
-Compare with a fit to a 2 df natural spline.
-```{r cf-spline}
+
+```{r yr88, out.width="30%", warning=FALSE}
 library(splines, quietly=TRUE)
-redDel2.glm <- glm(pobs~ns(ct,2), data=redDel, weights=tot,
+codling88  <- droplevels(subset(DAAG::codling, year==1988))
+cult <- sort(unique(codling88$Cultivar))
+for(culti in cult){
+dset <- subset(codling88, Cultivar==culti)
+gp <- unique(dset$gp)
+k <- 1
+for (j in gp){
+  k <- k+1
+  dsetj <- droplevels(subset(dset, gp==j))
+  gcm <- cloglog(dsetj[['cm']][1])
+  ylim=range(c(gcm,cloglog(dsetj[['pobs']])))
+  if(j==gp[1]) plot(cloglog(pobs)~log(ct), data=dsetj, col=k, ylim=ylim) else 
+    points(cloglog(pobs)~log(ct), data=dsetj, col=k)
+  abline(h=gcm, col=k, lty=3)
+dset1.glm <- glm(pobs~log(ct), data=dsetj, weights=tot,
                    family=quasibinomial(link='cloglog'))
-fit2 <- predict(redDel2.glm)
-print(coef(summary(redDel2.glm)), digits=2)
-   vv <- summary(redDel.glm)$cov.scaled
-   ci <- fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
-   print(ci, digits=2)
+dset2.glm <- glm(pobs~ns(log(ct),2), data=dsetj, weights=tot,
+                   family=quasibinomial(link='cloglog'))
+fit1 <- predict(dset1.glm)                   
+fit2 <- predict(dset2.glm)
+lines(log(dsetj[['ct']]),fit1, col=k)
+lines(log(dsetj[['ct']]),fit2, col=k, lty=2)
+}
+mtext(side=3, line=0.5, culti)
+}
+```
+
+```{r yr89, fig.asp=1, out.width="30%"}
+library(splines, quietly=TRUE)
+codling89  <- droplevels(subset(DAAG::codling, year==1989))
+cult <- sort(unique(codling89$Cultivar))
+for(culti in cult){
+dset <- subset(codling89, Cultivar==culti)
+gp <- unique(dset$gp)
+k <- 1
+for (j in gp){
+  k <- k+1
+  dsetj <- droplevels(subset(dset, gp==j))
+  gcm <- cloglog(dsetj[['cm']][1])
+  ylim=range(c(gcm,cloglog(dsetj[['pobs']])))
+  if(j==gp[1]) plot(cloglog(pobs)~log(ct), data=dsetj, col=k, ylim=ylim) else 
+    points(cloglog(pobs)~log(ct), data=dsetj, col=k)
+  abline(h=gcm, col=k, lty=3)
+dset1.glm <- glm(pobs~log(ct), data=dsetj, weights=tot,
+                   family=quasibinomial(link='cloglog'))
+dset2.glm <- glm(pobs~ns(log(ct),2), data=dsetj, weights=tot,
+                   family=quasibinomial(link='cloglog'))
+fit1 <- predict(dset1.glm)                   
+fit2 <- predict(dset2.glm)
+lines(log(dsetj[['ct']]),fit1, col=k)
+lines(log(dsetj[['ct']]),fit2, col=k, lty=2)
+}
+mtext(side=3, line=0.5, culti)
+}
+```
+
+```{r byRep2, out.width="30%"}
+codling <- DAAG::codling
+codling$cultYear <- with(codling, paste0(Cultivar, year))
+codling$Rep <- with(codling, qra::gpsWithin(gp,cultYear))
+add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling,
+                family=quasibinomial(link='cloglog'))
+byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling,
+                 family=quasibinomial(link='cloglog'))
+anova(add2.glm, byRep.glm, test='F')
+lab <- paste(1:nrow(codling))
+plot(add2.glm, which=1:3, labels.id=lab)
+```
+
+## Repeat, omitting observations 72 and 91
+
+In the analysis that omits rows 72 and 91, row 70 then appears as
+an outlier. All these are points that lie above the fitted curve.
+
+```{r omit72and91}
+add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling[-c(72,91),],
+                family=quasibinomial(link='cloglog'))
+byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling[-c(72,91),],
+                 family=quasibinomial(link='cloglog'))
+anova(add2.glm, byRep.glm, test='F')
+add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling[-c(70,72,91),],
+                family=quasibinomial(link='cloglog'))
+byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling[-c(70,72,91),],
+                 family=quasibinomial(link='cloglog'))
+anova(add2.glm, byRep.glm, test='F')
+```
+
+It is interesting that, in contrast to data from more recent work, 
+the scale-location plot is flat, indicating that dispersion is close
+to constant over the whole of the range.
+
+## Random effects analysis
+
+```{r glmer}
+library(lme4)
+codling$live <- with(codling, tot-dead)
+codling$sclogdose <- with(codling, scale(log(dose)))
+add2.glmer <- glmer(cbind(dead,live)~cultYear*ns(sclogdose,2)+
+                    (sclogdose|gp), data=codling, nAGQ=0,
+                    family=binomial(link='cloglog'))
 ```

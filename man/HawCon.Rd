@@ -12,7 +12,9 @@ The counts of live/dead were derived by injecting a known number of individuals 
   A data frame with 106 observations on the following 10 variables.
   \describe{
     \item{\code{Species}}{Species of fruitfly}
-    \item{\code{CommonName}}{Common name}
+    \item{\code{CN}}{Common name, in abbreviated form.
+    MedFly is \sQuote{Mediterranean Fruit Fly}.  MelonFly is
+    \sQuote{Melon Fly}}
     \item{\code{LifestageTrt}}{Lifestage treated}
     \item{\code{RepNumber}}{Replicate number}
     \item{\code{PropDead}}{Fraction dead}
