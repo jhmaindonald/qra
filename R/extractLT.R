@@ -36,12 +36,15 @@ extractLT <-
            scaling=1,
            df.t=NULL){
   if(inherits(obj,'lm')){
+    if(is.null(df.t))df.t <- summary(obj)$df.residual
     bfun <- coef
     varfun <- vcov
   } else if(class(obj)%in%c("lmerMod","glmerMod")) {
+    ngrps <- summary(obj)$ngrps
     bfun <- fixef
     varfun <- vcov
   } else if(class(obj)=="glmmTMB") {
+    ngrps <- summary(obj)$ngrps[['cond']]
     bfun <- function(x)fixef(x)[["cond"]]
     varfun <- function(x)vcov(x)[["cond"]]
   } else {
