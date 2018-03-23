@@ -54,13 +54,15 @@ extractLT <-
   }
   LT99 <- matrix(0, nrow=nEsts, ncol=4)
   pAdj <- (p+eps)/(1+2*eps)
-  rownames(LT99) <- names(fixef(obj))[1:nEsts]
+  blmm <- bfun(obj)
+  vlmm <- varfun(obj)
+  rownames(LT99) <- names(blmm)[1:nEsts]
   if(is.null(df.t))df.t <- ngrps-nEsts
   for(i in 1:nEsts){
     ab <- c(i, slopeAdd+i)
-    blmm <- bfun(obj)[ab]
-    vlmm <- varfun(obj)[ab,ab]
-    LT99[i,] <- qra::fieller(pAdj, blmm,vlmm, df.t=16, offset=scaling,
+    bi <- blmm[ab]
+    vii <- vlmm[ab,ab]
+    LT99[i,] <- qra::fieller(pAdj, bi,vii, df.t=df.t, offset=scaling,
                              logscale=logscale, link=link, eps=eps)[1:4]
   }
   colnames(LT99) <- c("est", "var", "lwr", "upr")
