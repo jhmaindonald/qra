@@ -35,14 +35,28 @@ extractLT <-
            eps=0,
            scaling=1,
            df.t=NULL){
+  if(inherits(obj,'lm')){
+    bfun <- coef
+    varfun <- vcov
+  } else if(class(obj)%in%c("lmerMod","glmerMod")) {
+    bfun <- fixef
+    varfun <- vcov
+  } else if(class(obj)=="glmmTMB") {
+    bfun <- function(x)fixef(x)[["cond"]]
+    varfun <- function(x)vcov(x)[["cond"]]
+  } else {
+    cl <- class(obj)
+    print(paste("No provision for object of class",cl))
+    return()
+  }
   LT99 <- matrix(0, nrow=nEsts, ncol=4)
   pAdj <- (p+eps)/(1+2*eps)
   rownames(LT99) <- names(fixef(obj))[1:nEsts]
   if(is.null(df.t))df.t <- summary(obj)$ngrps-nEsts
   for(i in 1:nEsts){
     ab <- c(i, slopeAdd+i)
-    blmm <- coef(summary(obj))[ab]
-    vlmm <- vcov(obj)[ab,ab]
+    blmm <- bfun(obj)[ab]
+    vlmm <- varfun(obj)[ab,ab]
     LT99[i,] <- qra::fieller(pAdj, blmm,vlmm, df.t=16, offset=scaling,
                              logscale=logscale, link=link, eps=eps)[1:4]
   }
