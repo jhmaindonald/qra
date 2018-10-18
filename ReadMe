@@ -4,3 +4,9 @@ functions and data for use for quantal response analysis, with the
 analysis of insect mortality data from exposure-mortality experiments
 primarily in mind.  "Exposure" may be dose of a fumigant, time in cold
 storage, or another such measure.
+
+This development version can be installed using the
+`install_git()` function from the `devtools` package, thus:
+```
+devtools::install_git('https://gitlab/daagur/qra.git')
+```
