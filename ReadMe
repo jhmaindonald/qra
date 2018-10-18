@@ -8,5 +8,5 @@ storage, or another such measure.
 This development version can be installed using the
 `install_git()` function from the `devtools` package, thus:
 ```
-devtools::install_git('https://gitlab/daagur/qra.git')
+devtools::install_git('https://gitlab.com/daagur/qra.git')
 ```
