@@ -12,7 +12,9 @@
 #' @param slopeAdd Add to the intercept number to get corresponding slope.
 #' @param lambda (\code{extractLTpwr} only) Power for power function.
 #' @param eps Replace \code{prob} by \code{prob+eps} before transformation.
-#' @param scaling Use to undo scaling of time or dose variable.
+#' @param offset Use to undo scaling of time or dose variable. This is
+#' passed to the \code{\link{fieller}} function that \code{extractLT}
+#' calls.
 #' @param df.t Degrees of freedom for variance-covariance matrix.
 #' If not supplied, it will be calculated internally.
 #'
@@ -33,7 +35,7 @@ extractLT <-
            nEsts=8,
            slopeAdd=8,
            eps=0,
-           scaling=1,
+           offset=0,
            df.t=NULL){
   if(inherits(obj,'lm')){
     if(is.null(df.t))df.t <- summary(obj)$df.residual
@@ -62,7 +64,7 @@ extractLT <-
     ab <- c(i, slopeAdd+i)
     bi <- blmm[ab]
     vii <- vlmm[ab,ab]
-    LT99[i,] <- qra::fieller(pAdj, bi,vii, df.t=df.t, offset=scaling,
+    LT99[i,] <- qra::fieller(pAdj, bi,vii, df.t=df.t, offset=offset,
                              logscale=logscale, link=link, eps=eps)[1:4]
   }
   colnames(LT99) <- c("est", "var", "lwr", "upr")
@@ -81,7 +83,7 @@ extractLTpwr <-
                       slopeAdd=8,
                       lambda=0,
                       eps=0.015,
-                      scaling=1,
+                      offset=0,
                       df.t=NULL){
   LT99 <- matrix(0, nrow=nEsts, ncol=4)
 
@@ -93,7 +95,7 @@ extractLTpwr <-
     vlmm <- vcov(obj)[ab,ab]
     LT99[i,] <- qra::fieller2(p, blmm,vlmm, link="fpower",
                               lambda=lambda,eps=eps, df.t=df.t,
-                              logscale=logscale, offset=scaling)[1:4]
+                              logscale=logscale, offset=offset)[1:4]
   }
   colnames(LT99) <- c("est", "var", "lwr", "upr")
   LT99

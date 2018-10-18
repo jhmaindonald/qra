@@ -5,14 +5,19 @@
 \title{Extract estimates of the intra-class correlation from a glmmTMB
 model object with beta-binomial error.}
 \usage{
-getRho(obj)
+getRho(obj, varMult = FALSE)
 }
 \arguments{
 \item{obj}{\pkg{glmmTMB} model object with betabinomial error}
+
+\item{varMult}{If \code{TRUE} return, in addition to \code{rho},
+the factor \code{mult} by which the variance is inflated
+relative to the binomial.}
 }
 \value{
-Vector with as many elements as there are observations,
-holding the estimates of \eqn{\rho}.
+if \code{varMult==FALSE} return (as a vector) the estimates
+of \eqn{\rho}, else (\code{varMult==FALSE}), else return
+\code{list(rho, mult)}.
 }
 \description{
 The intra-class correlation is calculated as

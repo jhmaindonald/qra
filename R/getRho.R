@@ -6,8 +6,12 @@
 #'   estimate given by the formula specified in the argument
 #'   \code{dispformula}.
 #' @param obj \pkg{glmmTMB} model object with betabinomial error
-#' @return Vector with as many elements as there are observations,
-#' holding the estimates of \eqn{\rho}.
+#' @param varMult If \code{TRUE} return, in addition to \code{rho},
+#' the factor \code{mult} by which the variance is inflated
+#' relative to the binomial.
+#' @return if \code{varMult==FALSE} return (as a vector) the estimates
+#' of \eqn{\rho}, else (\code{varMult==FALSE}), else return
+#' \code{list(rho, mult)}.
 #' @examples{
 #' codling1988 <- qra::codling1988
 #' codling1988$gp <- with(codling1988, paste0(Cultivar,rep))
@@ -16,12 +20,17 @@
 #' data=subset(codling1988,dose>=16))
 #' rho <- getRho(ge16xl.TMB)
 #' }
-#' @importFrom stats model.matrix
+#' @importFrom stats model.matrix model.frame
 #' @export
-getRho <- function(obj){
+getRho <- function(obj, varMult=FALSE){
   mm <- model.matrix(obj$modelInfo$allForm$dispformula,
                      data=obj$frame)
   fixdisp <- fixef(obj)[["disp"]]
-  1/(1+exp(mm%*%fixdisp))
+  rho <- 1/(1+exp(mm%*%fixdisp))
+  if(varMult){
+    total <- rowSums(model.frame(obj)[["cbind(Dead, Live)"]])
+    list(rho=rho, mult=(1+(total-1)*rho))
+  } else
+    c("rho"=rho)
 }
 

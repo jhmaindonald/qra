@@ -1,0 +1,14 @@
+                 Changes in qra version 0.1.24 (2018-09-29)
+
+NEW FEATURES
+  o The function `getRho()` now has an additional argument
+    `varMult`, with default value `FALSE`.  If `TRUE`, a
+    list will be returned, with values of `rho` as the first
+    element, and values of the multiplier for the binomial
+    variance (in terminology used in connection with `glm()`,
+    the "dispersion") as the second element.
+  o The parameter `scaling` has been changed to `offset`.
+
+BUG FIXES
+  o The default for `scaling` (now `offset`) was 1.0, where
+  it should have been 1.

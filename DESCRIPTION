@@ -1,8 +1,8 @@
 Package: qra
 Type: Package
 Title: Quantal Respose Analysis For Dose-Mortality Data
-Date: 2018-05-10
-Version: 0.1.23
+Date: 2018-09-29
+Version: 0.1.24
 Author: John Maindonald
 Maintainer: John Maindonald <john@statsresearch.co.nz>
 Description: Provides utility functions for the analysis

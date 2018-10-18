@@ -6,10 +6,10 @@
 \title{Obtain complete set of LT or LD estimates}
 \usage{
 extractLT(p = 0.99, obj, link = "logit", logscale = FALSE, nEsts = 8,
-  slopeAdd = 8, eps = 0, scaling = 1, df.t = NULL)
+  slopeAdd = 8, eps = 0, offset = 0, df.t = NULL)
 
 extractLTpwr(p = 0.99, obj, link = "fpower", logscale = FALSE,
-  nEsts = 8, slopeAdd = 8, lambda = 0, eps = 0.015, scaling = 1,
+  nEsts = 8, slopeAdd = 8, lambda = 0, eps = 0.015, offset = 0,
   df.t = NULL)
 }
 \arguments{
@@ -31,7 +31,9 @@ are assumed to be intercepts.}
 
 \item{eps}{Replace \code{prob} by \code{prob+eps} before transformation.}
 
-\item{scaling}{Use to undo scaling of time or dose variable.}
+\item{offset}{Use to undo scaling of time or dose variable. This is
+passed to the \code{\link{fieller}} function that \code{extractLT}
+calls.}
 
 \item{df.t}{Degrees of freedom for variance-covariance matrix.
 If not supplied, it will be calculated internally.}
