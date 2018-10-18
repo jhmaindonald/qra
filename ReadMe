@@ -10,3 +10,14 @@ This development version can be installed using the
 ```
 devtools::install_git('https://gitlab.com/daagur/qra.git')
 ```
+
+Use the available options for `install.packages()` as required, e.g.,
+to ensure that vignettes are built (by default, they are not:)
+```
+devtools::install_git('https://gitlab.com/daagur/DAAG.git',build_vignettes=TRUE)
+```
+
+One may want to specify `upgrade_dependencies = FALSE`, and attend separately
+to the updating of dependencies, and/or to specify, e.g.
+`dependencies=c("Depends", "Imports", "LinkingTo")`. (By default,
+`dependencies=TRUE`., i.e., also "Suggests".)
