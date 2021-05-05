@@ -4,14 +4,14 @@ author: "John Maindonald"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Compare Analyses}
+  %\VignetteIndexEntry{Plot MeBr Apple Fumigation Data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r linkfun, message=FALSE}
 library(qra, quietly=TRUE)
-require(ggplot2)
+library(ggplot2)
 ```
 
 ## Plot data
@@ -33,140 +33,141 @@ codling0[["Rep"]] <- with(codling0, qra::gpsWithin(gp, list(Cultivar,year)))
 
 # Plot 1988 and 1989 data separately
 ```{r y1988, fig.width=7, fig.height=2.5, eval=TRUE, out.width='100%'}
-library(ggplot2)
 graphSum(df=codling0, subSet=expression(year==1988),
-                     link="cloglog", logScale=TRUE,
-                     dead="dead", tot="tot", dosevar="logCT", Rep="Rep",
+                     link="cloglog", logScale=FALSE,
+                     dead="dead", tot="tot", dosevar="CT", Rep="Rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",
                      xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"))
 ```
 
-```{r y1989, fig.width=6.5, fig.height=2.5, out.width="75%", eval=TRUE}
+```{r y1989, fig.width=6.5, fig.height=2.5, out.width="80%", eval=TRUE}
 graphSum(df=codling0, subSet=expression(year==1989),
-                     link="cloglog", logScale=TRUE,
-                     dead="dead", tot="tot", dosevar="logCT", Rep="Rep",
+                     link="cloglog", logScale=FALSE,
+                     dead="dead", tot="tot", dosevar="CT", Rep="Rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",
                      xlab=expression(bold("CT ")*"(gm.h."*m^{-3}*")"))
 ```
+## Correct for control mortality
 
-## GLM: quasibinomial link - no ctl mortality adjustment
-
-```{r GLMquasi}
-cloglog <- stats::make.link("cloglog")[["linkfun"]]
-redDel <- subset(codling,
-                 Cultivar=="Red Delicious")
-redDel <- droplevels(redDel)
-   redDel.glm <- glm(pobs~ct, data=redDel, weights=tot,
-                     family=quasibinomial(link='cloglog'))
-   vv <- summary(redDel.glm)$cov.scaled
-   ci <- fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')
-print(round(ci,2))
-```   
-
-```{r yr88, out.width="30%", warning=FALSE}
-library(splines, quietly=TRUE)
+```{r yr88, fig.width=6.5, fig.height=2.25, out.width="80%"}
+library(lattice)
+cloglog <- make.link("cloglog")$linkfun
 codling88  <- droplevels(subset(DAAG::codling, year==1988))
-cult <- sort(unique(codling88$Cultivar))
-for(culti in cult){
-dset <- subset(codling88, Cultivar==culti)
-gp <- unique(dset$gp)
-k <- 1
-for (j in gp){
-  k <- k+1
-  dsetj <- droplevels(subset(dset, gp==j))
-  gcm <- cloglog(dsetj[['cm']][1])
-  ylim=range(c(gcm,cloglog(dsetj[['pobs']])))
-  if(j==gp[1]) plot(cloglog(pobs)~log(ct), data=dsetj, col=k, ylim=ylim) else 
-    points(cloglog(pobs)~log(ct), data=dsetj, col=k)
-  abline(h=gcm, col=k, lty=3)
-dset1.glm <- glm(pobs~log(ct), data=dsetj, weights=tot,
-                   family=quasibinomial(link='cloglog'))
-dset2.glm <- glm(pobs~ns(log(ct),2), data=dsetj, weights=tot,
-                   family=quasibinomial(link='cloglog'))
-fit1 <- predict(dset1.glm)                   
-fit2 <- predict(dset2.glm)
-lines(log(dsetj[['ct']]),fit1, col=k)
-lines(log(dsetj[['ct']]),fit2, col=k, lty=2)
-}
-mtext(side=3, line=0.5, culti)
-}
+codling88 <- within(codling88, apobs <- (pobs-cm)/(1-cm))
+# ctl <- glmmTMBControl(optimizer=optim,
+#                       optArgs=list(method="BFGS"))
+# codling88.BB2 <- glmmTMB(cbind(dead,tot-dead)~0+
+#                            Cultivar/poly(ct,2)+(ct|gp),
+#                            family=betabinomial(link='cloglog'),
+#                            data=codling88, control=ctl)
+codling88[["Rep"]] <- with(codling88, qra::gpsWithin(gp, list(Cultivar,year)))
+xyplot(cloglog(apobs)~ct|Cultivar, groups=Rep, data=codling88)
 ```
 
 ```{r yr89, fig.asp=1, out.width="30%"}
-library(splines, quietly=TRUE)
 codling89  <- droplevels(subset(DAAG::codling, year==1989))
-cult <- sort(unique(codling89$Cultivar))
-for(culti in cult){
-dset <- subset(codling89, Cultivar==culti)
-gp <- unique(dset$gp)
-k <- 1
-for (j in gp){
-  k <- k+1
-  dsetj <- droplevels(subset(dset, gp==j))
-  gcm <- cloglog(dsetj[['cm']][1])
-  ylim=range(c(gcm,cloglog(dsetj[['pobs']])))
-  if(j==gp[1]) plot(cloglog(pobs)~log(ct), data=dsetj, col=k, ylim=ylim) else 
-    points(cloglog(pobs)~log(ct), data=dsetj, col=k)
-  abline(h=gcm, col=k, lty=3)
-dset1.glm <- glm(pobs~log(ct), data=dsetj, weights=tot,
-                   family=quasibinomial(link='cloglog'))
-dset2.glm <- glm(pobs~ns(log(ct),2), data=dsetj, weights=tot,
-                   family=quasibinomial(link='cloglog'))
-fit1 <- predict(dset1.glm)                   
-fit2 <- predict(dset2.glm)
-lines(log(dsetj[['ct']]),fit1, col=k)
-lines(log(dsetj[['ct']]),fit2, col=k, lty=2)
+codling89 <- within(codling89, apobs <- (pobs-cm)/(1-cm))
+codling89[["Rep"]] <- with(codling89, qra::gpsWithin(gp, list(Cultivar,year)))
+xyplot(cloglog(apobs)~ct|Cultivar, groups=Rep, data=codling89)
+```
+
+We now check the consistency of control mortality estimates
+across and within cultivars.
+
+```{r cm}
+cmDF <- DAAG::codling[, c('year','Cultivar',
+                         'dead','tot', 'cm','numcm','gp')]
+cmDF$Rep <- qra::gpsWithin(cmDF$gp,cmDF$Cultivar)
+cmDF <- cmDF[match(unique(cmDF$gp),cmDF$gp),]
+cmDF$cmdead <- with(cmDF, round(numcm*cm))
+cmDF88 <- subset(cmDF, year==1988)
+cmDF89 <- subset(cmDF, year==1989)
+ctl <- glmmTMBControl(optimizer=optim,
+                      optArgs=list(method="BFGS"))
+cm88.TMB <- glmmTMB(cbind(cmdead,numcm-cmdead)~Cultivar,
+               family=betabinomial(link='logit'), 
+               subset(cmDF,year==1988))
+cm88.glm <- glm(cbind(cmdead,numcm-cmdead)~Cultivar, 
+               family=quasibinomial(link='logit'), 
+               data=subset(cmDF,year==1988))
+cm89.TMB <- glmmTMB(cbind(cmdead,numcm-cmdead)~Cultivar, 
+                   family=betabinomial(link='logit'), 
+                   data=subset(cmDF,year==1989))
+cm89.glm <- glm(cbind(cmdead,numcm-cmdead)~Cultivar, 
+                family=quasibinomial(link='logit'), 
+                data=subset(cmDF,year==1989))
+```
+
+The following shows the range of estimated variance multipliers
+for the fit with a betabinomial error, and compares it with 
+the "dispersion" estimate for a `glm()` fit with quasibinomial 
+error.
+
+```{r varmult}
+mults <- matrix(nrow=2, ncol=6)
+dimnames(mults) <- list(c('88','89'),c('phi','nmin','nmax',
+                                       'Phimin','Phimax','PhiGLM'))
+phi88 <- sigma(cm88.TMB)
+nrange <- range(subset(cmDF,year==1988)$numcm)
+Phirange <- 1+phi88^{-1}*(nrange-1)
+mults['88',] <- c(phi88, nrange, Phirange, 
+                  summary(cm88.glm)$dispersion)
+phi89 <- sigma(cm89.TMB)
+nrange <- range(subset(cmDF,year==1989)$numcm)
+Phirange <- 1+phi89^{-1}*(nrange-1)
+mults['89',] <- c(phi89, nrange, Phirange, 
+                  summary(cm89.glm)$dispersion)
+round(mults,2)
+```
+
+The estimates of $\phi$ (`sigma`) are 1988: `r round(phi88^-1,6)`; and 1989: `r round(phi89^-1,5)` .  Although very small, multiplication by
+values of $n$ that are in the thousands lead to a variance multiplier
+that is noticeably greater than 1.0 on 1988, and substantial ijn 1989.
+
+Now fit a model for the 1989 control mortality data that allows the 
+betabinomial dispersion parameter to be different for the
+different cultivars.  The `dispformula` changes from the default
+`dispformula = ~1` to `dispformula = ~0+Cultivar`.  (Use of
+`dispformula = ~Cultivar`, equivalent to `dispformula = ~1+Cultivar`,
+would give a parameterization that is less convenient for
+present purposes.)
+```{r more-on-cm89}
+cm89d.TMB <- update(cm89.TMB, dispformula=~0+Cultivar,    
+                   control=ctl)
+nranges <- with(subset(cmDF,year==1989),
+                sapply(split(numcm,Cultivar),range))
+phi89d <- exp(coef(summary(cm89d.TMB))$disp[,1])
+Phiranges <- 1+t(nranges-1)*phi89d^-1
+colnames(Phiranges) <- c("Min","Max")
+round(Phiranges,2)
+```
+Because the model formula allowed different values for 
+different observations, the function `sigma()` could no
+longer be used to extract what are now three different
+dispersion parameters.  Instead, it was necessary to
+specify `coef(summary(cm89d.TMB))$disp[,1]`, and then
+(because a logarithmic link function is used) take the 
+exponent.  (Use of `coef(summary(cm89d.TMB))$disp` gives,
+on the logarithmic link scale, standard errors, z values,
+and $p$-values.)
+
+```{r cmDF88-cults}
+cults <- unique(cmDF88$Cultivar)
+mat <- matrix(nrow=length(cults),ncol=5)
+dimnames(mat) <- list(cults,
+                      c("phi","nmin","nmax","PhiMin","PhiMax"))
+for(cult in cults){
+df <- subset(cmDF88, cult==Cultivar)
+obj <- glmmTMB(cbind(dead,tot-dead)~1,       
+               family=betabinomial(link='logit'), data=df)
+phi <- sigma(obj)
+nrange <- range(df$numcm)
+mat[cult,] <- c(phi, nrange, 1+(nrange-1)*phi^-1)
 }
-mtext(side=3, line=0.5, culti)
-}
+round(mat,1)
 ```
 
-```{r byRep2, out.width="30%"}
-codling <- DAAG::codling
-codling$cultYear <- with(codling, paste0(Cultivar, year))
-codling$Rep <- with(codling, qra::gpsWithin(gp,cultYear))
-add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling,
-                family=quasibinomial(link='cloglog'))
-byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling,
-                 family=quasibinomial(link='cloglog'))
-anova(add2.glm, byRep.glm, test='F')
-lab <- paste(1:nrow(codling))
-plot(add2.glm, which=1:3, labels.id=lab)
-```
-
-## Repeat, omitting observations 72 and 91
-
-In the analysis that omits rows 72 and 91, row 70 then appears as
-an outlier. All these are points that lie above the fitted curve.
-
-```{r omit72and91}
-add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling[-c(72,91),],
-                family=quasibinomial(link='cloglog'))
-byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling[-c(72,91),],
-                 family=quasibinomial(link='cloglog'))
-anova(add2.glm, byRep.glm, test='F')
-add2.glm <- glm(pobs~cultYear*Rep+ns(log(ct),2), data=codling[-c(70,72,91),],
-                family=quasibinomial(link='cloglog'))
-byRep.glm <- glm(pobs~cultYear*Rep*ns(log(ct),2), data=codling[-c(70,72,91),],
-                 family=quasibinomial(link='cloglog'))
-anova(add2.glm, byRep.glm, test='F')
-```
-
-It is interesting that, in contrast to data from more recent work, 
-the scale-location plot is flat, indicating that dispersion is close
-to constant over the whole of the range.
-
-## Random effects analysis
-
-```{r glmer}
-library(lme4)
-codling$live <- with(codling, tot-dead)
-codling$sclogdose <- with(codling, scale(log(dose)))
-add2.glmer <- glmer(cbind(dead,live)~cultYear*ns(sclogdose,2)+
-                    (sclogdose|gp), data=codling, nAGQ=0,
-                    family=binomial(link='cloglog'))
-```

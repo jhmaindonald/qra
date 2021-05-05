@@ -151,7 +151,7 @@ gg0 <- gg0+
     xlab(xlab)+ ylab(ylabel)+
     ggtitle(paste0(maint, addtxt))+
     theme(axis.title=element_text(size=13,face="bold"),
-          axis.text.x = element_text(color = c("brown",rep("black",length(xtik)-1))),
+          axis.text.x = element_text(color = "brown"),
           plot.title=element_text(size=13)) +
   scale_x_continuous(breaks=xtik, labels=paste(xaxlab))+
   scale_y_continuous(breaks=ytik, labels=paste(ytiklab)) +

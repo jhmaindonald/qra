@@ -5,12 +5,30 @@
 \alias{extractLTpwr}
 \title{Obtain complete set of LT or LD estimates}
 \usage{
-extractLT(p = 0.99, obj, link = "logit", logscale = FALSE, nEsts = 8,
-  slopeAdd = 8, eps = 0, offset = 0, df.t = NULL)
+extractLT(
+  p = 0.99,
+  obj,
+  link = "logit",
+  logscale = FALSE,
+  nEsts = 8,
+  slopeAdd = 8,
+  eps = 0,
+  offset = 0,
+  df.t = NULL
+)
 
-extractLTpwr(p = 0.99, obj, link = "fpower", logscale = FALSE,
-  nEsts = 8, slopeAdd = 8, lambda = 0, eps = 0.015, offset = 0,
-  df.t = NULL)
+extractLTpwr(
+  p = 0.99,
+  obj,
+  link = "fpower",
+  logscale = FALSE,
+  nEsts = 8,
+  slopeAdd = 8,
+  lambda = 0,
+  eps = 0.015,
+  offset = 0,
+  df.t = NULL
+)
 }
 \arguments{
 \item{p}{Desired mortality proportion.}

@@ -4,11 +4,22 @@
 \alias{graphResid}
 \title{Draw plots f residuals from model fitted to insect mortality data}
 \usage{
-graphResid(df, subSet = NULL, logScale = FALSE, dosevar = "logCT",
-  Res = "Res", Rep = "Rep", span = 0.85, byFacet = ~Species,
-  layout = NULL, maint = "MeBr", pch = 16, ptSize = 2,
-  xzeroOffsetFrac = 0.08, xlab = expression(bold("CT ") * "(gm.h." * m^{    
-  -3 } * ")"))
+graphResid(
+  df,
+  subSet = NULL,
+  logScale = FALSE,
+  dosevar = "logCT",
+  Res = "Res",
+  Rep = "Rep",
+  span = 0.85,
+  byFacet = ~Species,
+  layout = NULL,
+  maint = "MeBr",
+  pch = 16,
+  ptSize = 2,
+  xzeroOffsetFrac = 0.08,
+  xlab = expression(bold("CT ") * "(gm.h." * m^{     -3 } * ")")
+)
 }
 \arguments{
 \item{df}{Data frame from which data will be taken}

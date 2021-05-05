@@ -4,13 +4,28 @@
 \alias{graphSum}
 \title{Draw graphs of insect mortality data}
 \usage{
-graphSum(df, subSet = NULL, link = "cloglog", logScale = FALSE,
-  dead = "Dead", tot = "Tot", dosevar = "logCT", Rep = "Rep",
-  fitRep = NULL, fitPanel = NULL, byFacet = ~Species, layout = NULL,
-  maint = "Codling Moth, MeBr", ptSize = 2, xzeroOffsetFrac = 0.08,
-  yzeroOneOffsets = c(-0.08, 0.08), yEps = 0.005,
+graphSum(
+  df,
+  subSet = NULL,
+  link = "cloglog",
+  logScale = FALSE,
+  dead = "Dead",
+  tot = "Tot",
+  dosevar = "logCT",
+  Rep = "Rep",
+  fitRep = NULL,
+  fitPanel = NULL,
+  byFacet = ~Species,
+  layout = NULL,
+  maint = "Codling Moth, MeBr",
+  ptSize = 2,
+  xzeroOffsetFrac = 0.08,
+  yzeroOneOffsets = c(-0.08, 0.08),
+  yEps = 0.005,
   xlab = expression(bold("CT ") * "(gm.h." * m^{     -3 } * ")"),
-  ylabel = NULL, ytiklab = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99))
+  ylabel = NULL,
+  ytiklab = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
+)
 }
 \arguments{
 \item{df}{Data frame from which data will be taken}
