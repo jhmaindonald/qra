@@ -12,6 +12,7 @@ vignette: >
 ```{r linkfun, message=FALSE}
 library(qra, quietly=TRUE)
 library(ggplot2)
+library(glmmTMB)
 ```
 
 ## Plot data
@@ -35,7 +36,7 @@ codling0[["Rep"]] <- with(codling0, qra::gpsWithin(gp, list(Cultivar,year)))
 ```{r y1988, fig.width=7, fig.height=2.5, eval=TRUE, out.width='100%'}
 graphSum(df=codling0, subSet=expression(year==1988),
                      link="cloglog", logScale=FALSE,
-                     dead="dead", tot="tot", dosevar="CT", Rep="Rep",
+                     dead="dead", tot="tot", dosevar="ct", Rep="Rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",
@@ -45,7 +46,7 @@ graphSum(df=codling0, subSet=expression(year==1988),
 ```{r y1989, fig.width=6.5, fig.height=2.5, out.width="80%", eval=TRUE}
 graphSum(df=codling0, subSet=expression(year==1989),
                      link="cloglog", logScale=FALSE,
-                     dead="dead", tot="tot", dosevar="CT", Rep="Rep",
+                     dead="dead", tot="tot", dosevar="ct", Rep="Rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",

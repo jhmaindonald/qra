@@ -1,8 +1,8 @@
 Package: qra
 Type: Package
 Title: Quantal Response Analysis For Dose-Mortality Data
-Date: 2020-11-18
-Version: 0.1.33
+Date: 2021-05-06
+Version: 0.1.4
 Author: John Maindonald
 Maintainer: John Maindonald <john@statsresearch.co.nz>
 Description: Functions are provided that implement the 

@@ -587,7 +587,7 @@ intra-class correlation \(\rho\).
 
 ```{r extract-BB-LTcll, echo=FALSE}
 HCbb.LTcll <- qra::extractLT(p=0.99, obj=HCbb.cll, link="cloglog",
-                              nEsts=8, slopeAdd=8, eps=0, df.t=NULL)[,-2]
+                              a=1:8, b=9:16, eps=0, df.t=NULL)[,-2]
 rownames(HCbb.LTcll) <- shorten(rownames(HCbb.LTcll))
 ```
 
@@ -598,16 +598,16 @@ HCbin.cll <- update(HCbb.cll, family=binomial(link="cloglog"))
 
 ```{r extract-crude-LTcll, echo=FALSE}
 HCbbDisp1.LTcll <- qra::extractLT(p=0.99, obj=HCbbDisp1.cll, link="cloglog",
-                             nEsts=8, slopeAdd=8, eps=0, df.t=NULL)[,-2]
+                             a=1:8, b=9:16, eps=0, df.t=NULL)[,-2]
 rownames(HCbbDisp1.LTcll) <- shorten(rownames(HCbbDisp1.LTcll))
 HCbin.LTcll <- qra::extractLT(p=0.99, obj=HCbin.cll, link="cloglog",
-                                  nEsts=8, slopeAdd=8, eps=0, df.t=NULL)[,-2]
+                                  a=1:8, b=9:16, eps=0, df.t=NULL)[,-2]
 rownames(HCbin.LTcll) <- shorten(rownames(HCbin.LTcll))
 ```
 
 ```{r extract-BB-LTlogit, echo=FALSE}
 HCbb.LTlogit <- qra::extractLT(p=0.99, obj=HCbb.logit, link="logit",
-                          nEsts=8, slopeAdd=8, eps=0, offset=c(1,1),
+                          a=1:8, b=9:16, eps=0, offset=c(1,1),
                           df.t=NULL)[,-2]
 rownames(HCbb.LTlogit) <- shorten(rownames(HCbb.LTlogit))
 ```
@@ -666,7 +666,7 @@ HCgauss.cll <- glmmTMB(cloglog((PropDead+0.002)/1.004)~0+
                          trtGp/TrtTime+(TrtTime|rep), 
                        family=gaussian(), data=HawCon)
 HCgauss.LTcll <- qra::extractLT(p=0.99, obj=HCgauss.cll, link="cloglog",
-                                 nEsts=8, slopeAdd=8, eps=0.002, offset=c(0,1),
+                                 a=1:8, b=9:16, eps=0.002, offset=c(0,1),
                                  df.t=NULL)[,-2]
 rownames(HCgauss.LTcll) <- shorten(rownames(HCgauss.LTcll))
 ```

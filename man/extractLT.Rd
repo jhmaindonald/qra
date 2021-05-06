@@ -10,8 +10,8 @@ extractLT(
   obj,
   link = "logit",
   logscale = FALSE,
-  nEsts = 8,
-  slopeAdd = 8,
+  a = 1:3,
+  b = 4:6,
   eps = 0,
   offset = 0,
   df.t = NULL
@@ -22,8 +22,8 @@ extractLTpwr(
   obj,
   link = "fpower",
   logscale = FALSE,
-  nEsts = 8,
-  slopeAdd = 8,
+  a = 1:3,
+  b = 1:3,
   lambda = 0,
   eps = 0.015,
   offset = 0,
@@ -31,10 +31,10 @@ extractLTpwr(
 )
 }
 \arguments{
-\item{p}{Desired mortality proportion.}
+\item{p}{Target mortality proportion.}
 
 \item{obj}{\code{merMod} object, created using \code{lmer()} or
-\code{glmer()}.}
+\code{glmerMod} object, created using \code{glmer()}.}
 
 \item{link}{Link function, specified as a character string.
 For a folded power function, specify \code{"fpower"}.}
@@ -42,10 +42,9 @@ For a folded power function, specify \code{"fpower"}.}
 \item{logscale}{Logical.  Specify \code{TRUE}, if LT values are
 to be back-transformed from a logarithmic scale.}
 
-\item{nEsts}{Number of groups. The first \code{nEsts} estimates
-are assumed to be intercepts.}
+\item{a}{Subscripts for intercepts.}
 
-\item{slopeAdd}{Add to the intercept number to get corresponding slope.}
+\item{b}{Subscripts for corresponding slopes.}
 
 \item{eps}{Replace \code{prob} by \code{prob+eps} before transformation.}
 
@@ -54,7 +53,10 @@ passed to the \code{\link{fieller}} function that \code{extractLT}
 calls.}
 
 \item{df.t}{Degrees of freedom for variance-covariance matrix.
-If not supplied, it will be calculated internally.}
+If not supplied, it will be calculated internally, using a
+conservative (low) value.  One is using the \code{t} distribution as
+an approximation.  Getting a good approximation is not straightforward.
+See `vignette('introduction-mixed-models', package='afex')`, page 19.}
 
 \item{lambda}{(\code{extractLTpwr} only) Power for power function.}
 }
@@ -62,5 +64,16 @@ If not supplied, it will be calculated internally.}
 Matrix holding LD or LD estimates.
 }
 \description{
-Obtain complete set of LT or LD estimates
+When supplied with a model object that has fitted
+dose-response lines for each of several levels of a factor,
+`extractLR` calls the function `fieller` to calculate lethal time
+}
+\details{
+Fixed coefficients from `obj` must be for intercepts and
+for slopes.  Starting the model formula with `0+` will commonly
+do what is required. The coefficients `fixef(obj)[a]` are assumed
+to specify line intercepts, while `fixef(obj)[b]` specify the
+corresponding slopes.  These replace the arguments `nEsts`
+(subscripts for intercepts were `1:nEsts`) and `slopeAdd`
+(subscripts for slopes were `(nEsts+1):(nEsts+slopeAdd)`).
 }
