@@ -1,8 +1,8 @@
 Package: qra
 Type: Package
 Title: Quantal Response Analysis For Dose-Mortality Data
-Date: 2021-05-06
-Version: 0.1.4
+Date: 2021-05-18
+Version: 0.1.6
 Author: John Maindonald
 Maintainer: John Maindonald <john@statsresearch.co.nz>
 Description: Functions are provided that implement the 
@@ -24,7 +24,8 @@ Depends: lattice
 Imports: ggplot2, car, lme4
 Suggests: knitr, rmarkdown, DAAG, plyr, robustlmm, MASS, fitODBOD,
     glmmTMB, VGAM, bbmle, epiphy, latticeExtra, xtable, testDriveR,
-    gamlss, bookdown, prettydoc, DHARMa, kableExtra, magrittr, plotrix
+    gamlss, bookdown, prettydoc, DHARMa, kableExtra, magrittr, 
+    splines, afex, plotrix
 VignetteBuilder: knitr
 LazyData: TRUE
 RoxygenNote: 7.1.1

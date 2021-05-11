@@ -79,18 +79,21 @@ HawCon <- qra::HawCon
 CCnum <- match("CommonName", names(HawCon))
 names(HawCon)[CCnum] <- "CN"
 ## trtGp will identify species & lifestage combination
-## rep will identify species, lifestage, and rep
+## trtGpRep will identify species, lifestage, and rep
 ## cTime is centered version of TrtTime
 ## scTime is centered and scaled version of TrtTime,
 ## needed to get some mixed model fits to converge
 HawCon <- within(HawCon, {
   trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
-  rep <- paste0(CN,LifestageTrt,":",RepNumber)
+  trtGpRep <- paste0(CN,LifestageTrt,":",RepNumber)
   cTime <- scale(TrtTime, scale=FALSE)
   scTime <- scale(TrtTime)
   logitp = log((Dead+1/6)/(Live+1/6))
 })
-pointLab <- 1:nrow(HawCon)
+obs <- 1:nrow(HawCon)
+HawCon$obsINrep <- gpsWithin(obs, HawCon$trtGpRep)
+HawCon$obsINtrtGp <- gpsWithin(obs, HawCon$trtGp) 
+HawCon$obs <- factor(obs)
 ```
 
 # Graphical Display
@@ -173,7 +176,6 @@ error distribution is the betabinomial.  Alternatives
 that are described in the literature are discussed in
 the vignette `vignette("countDists", package = "qra")`.
 
-
 In the sequel a betabinomial error model will be assumed, as
 implmented in the __glmmTMB__ package.  The parameterization 
 is as described in @morris1997disentangling, with parameters 
@@ -198,7 +200,7 @@ important difference.
 
 ## Complementary log-log versus logit link
 
-Figure \@ref{fig:glmmTMB-altFits-gph}  shows lines and curves
+Figure \@ref(fig:glmmTMB-altFits-gph)  shows lines and curves
 from alternative models that have been fitted to the data.
 
 ```{r glmmTMB-altFits, message=FALSE, warning=FALSE, echo=FALSE}
@@ -206,30 +208,39 @@ if("VGAM" %in% (.packages()))
   detach("package:VGAM", unload=TRUE)
 # Load packages that will be used
 suppressMessages(
-  {library(lme4); library(glmmTMB); library(DHARMa)})
+  {library(lme4); library(glmmTMB); library(splines); 
+    library(DHARMa)})
 ctl <- glmmTMBControl(optimizer=optim, 
                       optArgs=list(method="BFGS"))
-HCbb.cll <- glmmTMB(cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep),
-                  dispformula=~trtGp+poly(TrtTime,3), control=ctl,
-                  family=betabinomial(link="cloglog"), data=HawCon)
+form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|trtGpRep)
+HCbb.cll <- glmmTMB(form, dispformula=~trtGp+ns(TrtTime,2), 
+                    family=betabinomial(link="cloglog"), 
+                    control=ctl, data=HawCon)
 HCbb2s.cll <- update(HCbb.cll, 
-                     formula=.~.+poly(scTime,2)[,-1]+(TrtTime|rep))
+             formula=.~.+ns(scTime,2)[,-1]+(TrtTime|trtGpRep))
 ## The first '.' leaves the LHS in place. The second '.' takes
 ## the existing RHS, then adding a quadratic term to it.
-HCbb.logit <- update(HCbb.cll, family=betabinomial(link="logit"))
+HCbb.logit <- update(HCbb.cll, 
+                     dispformula=~trtGp+poly(TrtTime,3), 
+                     family=betabinomial(link="logit"))
 HCbb2s.logit <- update(HCbb.logit,
-                     formula=.~.+poly(TrtTime,2)[,-1]+(TrtTime|rep))
+            formula=.~.+ns(TrtTime,2)[,-1]+(TrtTime|trtGpRep))
+## family(HCbb.cll)$link
+## family(HCqb.glm)$link
 ```
 
-```{r cap5, echo=FALSE}
-cap5 <- "Fitted lines and quadratic curves, for the models where the
+
+## A comparison of fitted values and confidence intervals
+ 
+```{r cap4, echo=FALSE}
+cap4 <- "Fitted lines and quadratic curves, for the models where the
 treatment effect is modeled as a quadratic function of time.
 Panel A is for the model that uses a complementary log-log
 (cloglog) link, while Panel B is for a logit link. The quadratic
 curves are shown in attenuated colors."
 ```
 
-```{r glmmTMB-altFits-gph, fig.width=9, fig.height=4.5, fig.show='hold', top=2, out.width="100%",  fig.align='center', message=FALSE, fig.cap=cap5, echo=FALSE}
+```{r glmmTMB-altFits-gph, fig.width=9, fig.height=4.5, fig.show='hold', top=2, out.width="100%",  fig.align='center', message=FALSE, fig.cap=cap4, echo=FALSE}
 library(lattice)
 my.panel.bands <- function(x, y, upper, lower, fill, col,
                            subscripts, ..., font, fontface)
@@ -250,7 +261,7 @@ parset <- simpleTheme(col=rep(1:4,rep(2,4)), lty=rep(1:2, 4), lwd=2)
 dat <- expand.grid(trtGp=factor(levels(HawCon$trtGp), levels=levels(HawCon$trtGp)),
                    TrtTime=pretty(range(HawCon$TrtTime),15), link=c('cloglog','logit'))
 dat$scTime <- scale(dat$TrtTime)
-dat$rep <- rep('new',nrow(dat))
+dat$trtGpRep <- rep('new',nrow(dat))
 hatClog <- predict(HCbb.cll, newdata=subset(dat, link=='cloglog'), se=TRUE, allow.new.levels=TRUE)
 hatClog2 <- predict(HCbb2s.cll, newdata=subset(dat, link=='cloglog'), se=TRUE, allow.new.levels=TRUE)
 hatLgt <- predict(HCbb.logit, newdata=subset(dat, link=='logit'), se=TRUE, allow.new.levels=TRUE)
@@ -283,7 +294,8 @@ gph3 <- xyplot(fit2~TrtTime|link, outer=TRUE, data=dat, groups=trtGp,
 gph2+latticeExtra::as.layer(gph3)
 ```
 
-Alternatives shown, for both the complementary log-log and logit links, are:  
+Alternatives shown, for both the complementary log-log and logit links, are:
+
 * Separate lines for each treatment group;  
 * Separate lines for each treatment group, plus a 2-degree
 polynomial function of time in cold storage that applies a common
@@ -318,10 +330,10 @@ line, for each different treatment group.
     overall constant term, with treatment group effects
     expressed as differences from the overall constant term.
 * The round brackets that enclose the remainder of the 
-  right hand side of the formula, i.e., `(TrtTime|rep)`, 
+  right hand side of the formula, i.e., `(TrtTime|trtGpRep)`, 
   identify it as supplying  random effects terms.  Here, a
   different random effects line is added for each replicate
-  (`rep`).  This is achieved by fitting a random
+  (`trtGpRep`).  This is achieved by fitting a random
   intercept and a random slope for each different replicate.
     + Note that `TrtTime` is by default interpreted as 
     `1 + TrtTime`.
@@ -342,14 +354,66 @@ of the default.  This, and the use of `update()` to
 add the quadratic term in `TrtTime`, avoids warning 
 messages that are otherwise generated. 
 
+
+```{r obsLevel, echo=FALSE}
+dMedEgg <- with(HawCon, dummy(trtGp,"MedFlyEgg:"))
+dMedL1 <- with(HawCon, dummy(trtGp,"MedFlyL1:"))
+dMedL2 <- with(HawCon, dummy(trtGp,"MedFlyL2:"))
+dMedL3 <- with(HawCon, dummy(trtGp,"MedFlyL3:"))
+dMelEgg <- with(HawCon, dummy(trtGp,"MelonFlyEgg:"))
+dMelL1 <- with(HawCon, dummy(trtGp,"MelonFlyL1:"))
+dMelL2 <- with(HawCon, dummy(trtGp,"MelonFlyL2:"))
+dMelL3 <- with(HawCon, dummy(trtGp,"MelonFlyL3:"))
+formXre <- cbind(Dead, Live) ~ 0 + trtGp/scTime +
+  (1|obs) + (1|trtGpRep) +
+  (0 + dMedEgg| trtGpRep) + (0 + dMedL1 | trtGpRep) +
+  (0 + dMedL2 | trtGpRep) + (0 + dMedL3 | trtGpRep) +
+  (0 + dMelEgg| trtGpRep) + (0 + dMelL1 | trtGpRep) +
+  (0 + dMelL2 | trtGpRep) + (0 + dMelL3 | trtGpRep)
+```
+
+```{r obsLevel1, echo=FALSE}
+dMedEgg <- with(HawCon, dummy(trtGp,"MedFlyEgg:"))
+dMedL1 <- with(HawCon, dummy(trtGp,"MedFlyL1:"))
+dMedL2 <- with(HawCon, dummy(trtGp,"MedFlyL2:"))
+dMedL3 <- with(HawCon, dummy(trtGp,"MedFlyL3:"))
+dMelEgg <- with(HawCon, dummy(trtGp,"MelonFlyEgg:"))
+dMelL1 <- with(HawCon, dummy(trtGp,"MelonFlyL1:"))
+dMelL2 <- with(HawCon, dummy(trtGp,"MelonFlyL2:"))
+dMelL3 <- with(HawCon, dummy(trtGp,"MelonFlyL3:"))
+formXre <- cbind(Dead, Live) ~ 0 + trtGp/scTime +
+  (1|obs) + (1|trtGpRep) + 
+  (0 + dMedEgg| trtGpRep) + (0 + dMedL1 | trtGpRep) +
+  (0 + dMedL2 | trtGpRep) + (0 + dMedL3 | trtGpRep) +
+  (0 + dMelEgg| trtGpRep) + (0 + dMelL1 | trtGpRep) +
+  (0 + dMelL2 | trtGpRep) + (0 + dMelL3 | trtGpRep)
+## NB: The formula has used the scaled value of time.
+## Below, `offset` is used to record the scaling parameters 
+## `center` ## and `scale` in `(x-center)/scale`.
+offset <- with(attributes(HawCon$scTime),
+               c(`scaled:center`, `scaled:scale`))
+HCXre.BIobs <- glmmTMB(formXre, family=binomial(link='cloglog'),
+                       control=ctl, data=HawCon)
+## Could not get the following to converge
+## formXreS <- update(formXre, ~ .+ trtGp/splines::ns(scTime,2))
+```
+
 ### AIC-based model comparisons {-}
+
+In addition to the models described so far, we will
+include also a model, to be discussed below, that
+assumes binomial errors, with observational level
+random effects added.
 
 The following shows differences ('dAIC') in AIC values
 from the model with smallest AIC:
 ```{r glmmTMB-altFits-AIC, echo=FALSE}
-mnam <- c(paste0('BB: Complementary log-log link', c('', ', added curve')),
-          paste0('BB: Logit link', c('', ', added curve')))
-bbmle::AICtab(HCbb.cll,HCbb2s.cll,HCbb.logit,HCbb2s.logit, mnames=mnam)
+mnam <- c(paste0('BB: Complementary log-log link', 
+                 c('', ', added curve')),
+                 paste0('BB: Logit link', c('', ', added curve')),
+          'Obs level REs, cloglog link')
+bbmle::AICtab(HCbb.cll,HCbb2s.cll,HCbb.logit,HCbb2s.logit, 
+              HCXre.BIobs, mnames=mnam)
 ```
 
 The table suggests that, with a complementary log-log link, 
@@ -378,36 +442,34 @@ residuals should be uniformly distributed irrespective of
 the conditioning.  See `?DHARMa::simulateResiduals` for
 details.
 
-  * For the data as a whole, the distribution of residuals
+* For the data as a whole, the distribution of residuals
   can be checked by plotting the quantile residuals against
   the corresponding quantiles.
- 
- *  A second check plots quantile residuals against quantiles of
+*  A second check plots quantile residuals against quantiles of
     predicted values. Quantile regression is then used to fit curves
     at 25%, 50%, and 75% quantiles of the quantile residuals. If the
     model is correctly specified, these should all be, to within
     statistical error, horizontal lines.
-* Plots against other explanatory variables can provide added
-    checks.
+* Plots against other explanatory variables provide added
+  checks.
 
 Do such deviations from assumptions as are present matter?  
-A useful device is to simulate
-new 'observations' from the model, and check whether there is
-a difference of substance in the fitted values and parameter
-estimates.
+A useful device is to simulate new 'observations' from the model, 
+and check whether there is a difference of substance in the 
+fitted values and parameter estimates.
 
 Figure \@ref(fig:DHARMa) shows the diagnostic plots for the linear model
 with a complementary log-log link. These are then used to replace the
 residuals from the model with quantile residuals.
 
-```{r cap7, echo=FALSE} 
-cap7 <- "Panel A shows the
+```{r cap6, echo=FALSE} 
+cap6 <- "Panel A shows the
 quantile-quantile plot.  Panel B plots estimated quantiles
 against mortality, while Panel C plots estimated quantiles
 against total number, on a logarithmic scale."
 ```
 
-```{r DHARMa, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap7}
+```{r DHARMa, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap6}
 set.seed(29)
 simRef <- simulateResiduals(HCbb.cll, n=250, seed=FALSE)
 plotQQunif(simRef)
@@ -432,11 +494,11 @@ shorten <- function(nam, leaveout=c('trtGp','Fly',':')){
 }
 ```
 
-```{r cap8, echo=FALSE}
-cap8 <- "Quantile residuals, by treatment group."
+```{r cap7, echo=FALSE}
+cap7 <- "Quantile residuals, by treatment group."
 ```
 
-```{r residBYgp, echo=FALSE, fig.width=5, fig.asp=0.7, bot=-2.5, warning=FALSE, fig.align='center', fig.show="hold", message=FALSE, out.width="49%", echo=FALSE, fig.cap=cap8}
+```{r residBYgp, echo=FALSE, fig.width=5, fig.asp=0.7, bot=-2.5, warning=FALSE, fig.align='center', fig.show="hold", message=FALSE, out.width="49%", echo=FALSE, fig.cap=cap7}
 simRes <- DHARMa::simulateResiduals(HCbb.cll, n=250)
 dotplot(scaledResiduals~HawCon$trtGp, data=simRes, 
         scales=list(x=list(rot=30)), ylab="Quantile Residuals",
@@ -468,24 +530,27 @@ plot the estimates of \(\rho\), based on modeling the
 logarithm of the scale parameter as a cubic function of
 `TrtTime` that is added to a straight line response that is
 different for each different treatment group. These
-estimates assume a cubic pattern of change that is
-consistent to within a constant multiple across all
-species/lifestage combinations.  The inclusion of a cubic
-term slightly modifies a roughly quadratic pattern.  Some
-such crude assumption is needed in order to account for
-dispersion factors that are much higher at midrange times
-and mortalities than at the extremes.
+estimates assume a natural spline two degree of freedom 
+pattern of change that is consistent to within a constant 
+multiple across all species/lifestage combinations.  The 
+pattern is roughly quadratic, with values moving from
+low to high to low as times increase. Some such crude 
+assumption is needed in order to account for dispersion 
+factors that are much higher at midrange times and 
+mortalities than at the extremes. Without such a multiplier,
+error estimates are too high at low and high mortalities,
+and too low at intermediate mortalities.  
 
 Figure \@ref(fig:glmmTMB-altFits-gph-disp)C shows the dispersion factor 
 estimates that correspond to the estimates of \(\rho\) in Panel A.
 
-```{r cap6, echo=FALSE}
-cap6 <- "Panels A and B show intra-class correlation estimates 
+```{r cap8, echo=FALSE}
+cap8 <- "Panels A and B show intra-class correlation estimates 
 for, respectively, a complementary log-log link and a logit link. 
 Both models assume a betabinomial error."
 ```
 
-```{r glmmTMB-altFits-gph-disp, fig.width=9, fig.height=3.5, top=2, out.width="100%",  fig.align='center', fig.show="hold", fig.cap=cap6, echo=FALSE}
+```{r glmmTMB-altFits-gph-disp, fig.width=9, fig.height=3.5, top=2, out.width="100%",  fig.align='center', fig.show="hold", fig.cap=cap8, echo=FALSE}
 parset <- simpleTheme(col=rep(1:4,rep(2,4)),pch=rep(c(1,2), 4), lwd=2)
 HawCon$rho2clog <- qra::getRho(HCbb.cll)
 HawCon$dispClog <- with(HawCon, 1+(Total-1)*rho2clog)
@@ -511,6 +576,13 @@ for purposes of calculating the sample size needed to
 demonstrate, at a 95% confidence level, the mandated 
 survival rate of no more than one in perhaps 100,000 
 insects.
+
+# Confidence intervals for ratios
+
+Fieller's formula provides a methodology for calculating
+confidence intervals for ratios.  Here, it will be turned
+to use for calculation of confidence intervals for exposures
+(times, or doses) required to kill 99% of insects.
 
 ## 99\% Lethal time estimates and confidence intervals
 
@@ -551,6 +623,8 @@ A usable implementation of the simulation approach,
 which seems needed for the calculation of confidence
 intervals for LT99 differences, can in principle be handled
 using the function `lme4::bootMer()`.
+
+## What difference does the choice of model make?
 
 We now proceed to investigate the damage done by assuming
 a constant dispersion factor, or by specifying a binomial
@@ -607,7 +681,7 @@ rownames(HCbin.LTcll) <- shorten(rownames(HCbin.LTcll))
 
 ```{r extract-BB-LTlogit, echo=FALSE}
 HCbb.LTlogit <- qra::extractLT(p=0.99, obj=HCbb.logit, link="logit",
-                          a=1:8, b=9:16, eps=0, offset=c(1,1),
+                          a=1:8, b=9:16, eps=0, offset=0,
                           df.t=NULL)[,-2]
 rownames(HCbb.LTlogit) <- shorten(rownames(HCbb.LTlogit))
 ```
@@ -656,24 +730,64 @@ may result.  Use of a model that is unsatisfactory
 within the range of the available data is not a good
 starting point for extrapolation into high mortality 
 regions, with the additional uncertainties that then 
-result. 
+result.
+
+# Further types of model
+
+## Binomial errors and observation level random effects
+
+The suggestion here is that for the replicates within each
+species/lifestage combination, the response in any one 
+observation is close to binomial. Added to this is random 
+variation between observations, with provision for the 
+associated variance to differ between species/lifestage/replicate combinations.  Contributions to the variance at all levels other
+than the observation add to the binomial variance.  By comparison
+with fitting a betabinomial or a quasibinomial error, the effect
+is to reduce variance of the observed mortalities at low and high 
+mortality points, relative to variance at midrange values.
+
+```{r obsLevel, echo=FALSE}
+```
+
+```{r obsLevel1, echo=FALSE}
+```
+
+```{r cap3}
+cap3 <- "Diagnostics for model with binomial errors and observation level
+random effects."
+```
+
+```{r DHARMa-obs, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap3, echo=TRUE}
+set.seed(29)
+simRef <- simulateResiduals(HCXre.BIobs, n=250, seed=FALSE)
+plotQQunif(simRef)
+plotResiduals(simRef)
+plotResiduals(simRef, form=log(HawCon$Total), xlab="log(Total)")
+```
+
+A better model is, however
+```{r only-obslevel}
+HCX.BIobs <- glmmTMB(cbind(Dead, Live) ~ 0 + trtGp/scTime +
+                     (1|obs) + (1|trtGpRep),
+                     family=binomial(link='cloglog'),
+                       control=ctl, data=HawCon)
+```
 
 ## Gaussian errors, on a complementary log-log scale
 
 ```{r LT99-HCgauss.LTcll}
 cloglog <- make.link('cloglog')$linkfun
 HCgauss.cll <- glmmTMB(cloglog((PropDead+0.002)/1.004)~0+
-                         trtGp/TrtTime+(TrtTime|rep), 
+                         trtGp/TrtTime+(TrtTime|trtGpRep), 
                        family=gaussian(), data=HawCon)
 HCgauss.LTcll <- qra::extractLT(p=0.99, obj=HCgauss.cll, link="cloglog",
-                                 a=1:8, b=9:16, eps=0.002, offset=c(0,1),
-                                 df.t=NULL)[,-2]
+                                 a=1:8, b=9:16, eps=0.002, offset=c(0,1),                                 df.t=NULL)[,-2]
 rownames(HCgauss.LTcll) <- shorten(rownames(HCgauss.LTcll))
 ```
 
 A further model that might be tried is a linear mixed model, 
 with \(log(1-log((p+0.002)/(1+0.004)))\) as the dependent 
-variable, complementary log-log link, and gaussian error.
+variable (complementary log-log link), and gaussian error.
 Figure \@ref(fig:Gauss-simRes)  shows the plot of residuals versus
 predicted quantile deviations.
 
@@ -717,6 +831,8 @@ estimates and bounds.  Note the big differences for the Egg and L1
 The issue here is that all points where the data show 100%
 mortality transform to the same $y$-ordinate in the plot of
 \(log(1-log((p+0.002)/(1+0.004)))\) against `TrtTime` .
+
+# Parting comments
 
 ## Understand the uncertainties, and proceed accordingly
 
@@ -769,18 +885,17 @@ given response probability $\pi$, does the multiplier for
 the binomial variance $n \pi (1-\pi)$ increase with $n$,
 as use of a betabinomial error assumes?
 
-Creation
-of an open database into which researchers would be required,
-or at least strongly encouraged to place their data, would 
-be a useful first step. The aim would be to check model
-predictions for each specific treatment type, and for each 
-class of pathogen, against the times found to 
-give high mortality in large-scale trials.  While there
-is an extensive literature that presents results of
-analyses from relevant trial data, and a very limited
-literature that makes comparisons across a number of
-different datasets, few of the relevant datasets are
-available in the public domain.
+A useful first step would be creation of an open database 
+into which researchers would be required, or at least 
+strongly encouraged, to place their data. This would 
+allow checking of model predictions for each specific 
+treatment type, and for each class of pathogen, against 
+the times found to give high mortality in large-scale 
+trials.  While there is an extensive literature that 
+presents results of analyses from relevant trial data, 
+and a very limited literature that makes comparisons 
+across a number of different datasets, few of the 
+relevant datasets are available in the public domain.
 
 <!-- ## Slope Versus Intercept Plot -->
 
@@ -826,7 +941,7 @@ available in the public domain.
 <!-- lines(xy[,c("a","b7")], lty=2, type="b", pch="7", col=2) -->
 <!-- ``` -->
 
-,<!-- ## Hotelling T^2^ -->
+<!-- ## Hotelling T^2^ -->
 <!-- The following uses a Hotelling T^2^ test to compare the means -->
 <!-- in the cases where the two ellipses (medFly L1 and MedFly L3) -->
 <!-- are closest to touching. The following requires careful checking. -->
