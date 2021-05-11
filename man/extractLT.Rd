@@ -6,10 +6,10 @@
 \title{Obtain complete set of LT or LD estimates}
 \usage{
 extractLT(
-  p = 0.99,
   obj,
-  link = "logit",
+  link = NULL,
   logscale = FALSE,
+  p = 0.99,
   a = 1:3,
   b = 4:6,
   eps = 0,
@@ -18,10 +18,10 @@ extractLT(
 )
 
 extractLTpwr(
-  p = 0.99,
   obj,
   link = "fpower",
   logscale = FALSE,
+  p = 0.99,
   a = 1:3,
   b = 1:3,
   lambda = 0,
@@ -31,16 +31,22 @@ extractLTpwr(
 )
 }
 \arguments{
-\item{p}{Target mortality proportion.}
-
 \item{obj}{\code{merMod} object, created using \code{lmer()} or
 \code{glmerMod} object, created using \code{glmer()}.}
 
-\item{link}{Link function, specified as a character string.
-For a folded power function, specify \code{"fpower"}.}
+\item{link}{Link function, for use with objects where no
+link was specified in the function call, but it is required
+to back-transform a transformation that was performed prior
+to the function call.  Otherwise leave as `link=NULL`, and
+the link function will be extracted as `family(obj)[['link']]`.
+For a folded power function, with `extractLTpwr()`, the only
+available link is "fpower", and the exponent `lambda` must be
+specified.}
 
 \item{logscale}{Logical.  Specify \code{TRUE}, if LT values are
 to be back-transformed from a logarithmic scale.}
+
+\item{p}{Target mortality proportion.}
 
 \item{a}{Subscripts for intercepts.}
 
@@ -66,7 +72,7 @@ Matrix holding LD or LD estimates.
 \description{
 When supplied with a model object that has fitted
 dose-response lines for each of several levels of a factor,
-`extractLR` calls the function `fieller` to calculate lethal time
+`extractLT` calls the function `fieller` to calculate lethal time
 }
 \details{
 Fixed coefficients from `obj` must be for intercepts and
@@ -76,4 +82,22 @@ to specify line intercepts, while `fixef(obj)[b]` specify the
 corresponding slopes.  These replace the arguments `nEsts`
 (subscripts for intercepts were `1:nEsts`) and `slopeAdd`
 (subscripts for slopes were `(nEsts+1):(nEsts+slopeAdd)`).
+}
+\examples{
+if(requireNamespace('glmmTMB', quietly=TRUE)){
+HawCon <- qra::HawCon
+CCnum <- match("CommonName", names(HawCon))
+names(HawCon)[CCnum] <- "CN"
+HawCon <- within(HawCon, {
+ trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
+ rep <- paste0(CN,LifestageTrt,":",RepNumber)
+})
+form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep)
+ctl <- glmmTMB::glmmTMBControl(optimizer=optim, optArgs=list(method="BFGS"))
+HCbb.cll <- glmmTMB::glmmTMB(form,
+                    dispformula=~trtGp+poly(TrtTime,3), control=ctl,
+                    family=glmmTMB::betabinomial(link="cloglog"),
+                    data=HawCon)
+extractLT(HCbb.cll, a=1:8, b=9:16)
+}
 }

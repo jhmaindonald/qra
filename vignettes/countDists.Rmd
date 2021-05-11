@@ -4,7 +4,7 @@ author: "John Maindonald"
 date: "19/10/2020"
 output:
   bookdown::html_document2:
-    theme: lumen
+    theme: cayman
     highlight: vignette
     base_format: prettydoc::html_pretty
     toc: true

@@ -2,7 +2,7 @@
 #'
 #' @description When supplied with a model object that has fitted
 #' dose-response lines for each of several levels of a factor,
-#' `extractLR` calls the function `fieller` to calculate lethal time
+#' `extractLT` calls the function `fieller` to calculate lethal time
 #` or lethal dose or other such estimates.
 #'
 #' @details Fixed coefficients from `obj` must be for intercepts and
@@ -16,8 +16,14 @@
 #' @param p Target mortality proportion.
 #' @param obj \code{merMod} object, created using \code{lmer()} or
 #' \code{glmerMod} object, created using \code{glmer()}.
-#' @param link Link function, specified as a character string.
-#' For a folded power function, specify \code{"fpower"}.
+#' @param link Link function, for use with objects where no
+#' link was specified in the function call, but it is required
+#' to back-transform a transformation that was performed prior
+#' to the function call.  Otherwise leave as `link=NULL`, and
+#' the link function will be extracted as `family(obj)[['link']]`.
+#' For a folded power function, with `extractLTpwr()`, the only
+#' available link is "fpower", and the exponent `lambda` must be
+#' specified.
 #' @param logscale Logical.  Specify \code{TRUE}, if LT values are
 #' to be back-transformed from a logarithmic scale.
 #' @param a Subscripts for intercepts.
@@ -34,24 +40,43 @@
 #' See `vignette('introduction-mixed-models', package='afex')`, page 19.
 #'
 #' @return Matrix holding LD or LD estimates.
+#' @examples
+#' if(requireNamespace('glmmTMB', quietly=TRUE)){
+#' HawCon <- qra::HawCon
+#' CCnum <- match("CommonName", names(HawCon))
+#' names(HawCon)[CCnum] <- "CN"
+#' HawCon <- within(HawCon, {
+#'  trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
+#'  rep <- paste0(CN,LifestageTrt,":",RepNumber)
+#' })
+#' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep)
+#' ctl <- glmmTMB::glmmTMBControl(optimizer=optim, optArgs=list(method="BFGS"))
+#' HCbb.cll <- glmmTMB::glmmTMB(form,
+#'                     dispformula=~trtGp+poly(TrtTime,3), control=ctl,
+#'                     family=glmmTMB::betabinomial(link="cloglog"),
+#'                     data=HawCon)
+#' extractLT(HCbb.cll, a=1:8, b=9:16)
+#' }
+
 #' @export
 #'
-#' @importFrom stats coef vcov
+#' @importFrom stats coef vcov family
 #' @importFrom lme4 fixef
 #
 #' @rdname extractLT
 #' @export
 
 extractLT <-
-  function(p=0.99,
-           obj,
-           link="logit",
+  function(obj,
+           link=NULL,
            logscale=FALSE,
+           p=0.99,
            a=1:3,
            b=4:6,
            eps=0,
            offset=0,
            df.t=NULL){
+  if(is.null(link))link <- family(obj)[['link']]
   if(length(a)!=length(b))stop("`a` and `b` must be the same length")
   if(inherits(obj,'lm')){
     if(is.null(df.t))df.t <- summary(obj)$df.residual
@@ -91,10 +116,10 @@ extractLT <-
 #' @export
 
 extractLTpwr <-
-  function(p=0.99,
-                      obj,
-                      link="fpower",
-                      logscale=FALSE,
+  function(obj,
+           link="fpower",
+           logscale=FALSE,
+           p=0.99,
                       a=1:3,
                       b=1:3,
                       lambda=0,
@@ -116,4 +141,5 @@ extractLTpwr <-
   }
   colnames(LT99) <- c("est", "var", "lwr", "upr")
   LT99
-}
+  }
+

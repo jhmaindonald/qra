@@ -90,7 +90,10 @@ HawCon <- within(HawCon, {
   scTime <- scale(TrtTime)
   logitp = log((Dead+1/6)/(Live+1/6))
 })
-pointLab <- 1:nrow(HawCon)
+obs <- 1:nrow(HawCon)
+HawCon$obsINrep <- gpsWithin(obs, HawCon$rep)
+HawCon$obsINtrtGp <- gpsWithin(obs, HawCon$trtGp) 
+HawCon$obs <- factor(obs)
 ```
 
 # Graphical Display
@@ -209,7 +212,8 @@ suppressMessages(
   {library(lme4); library(glmmTMB); library(DHARMa)})
 ctl <- glmmTMBControl(optimizer=optim, 
                       optArgs=list(method="BFGS"))
-HCbb.cll <- glmmTMB(cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep),
+form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep)
+HCbb.cll <- glmmTMB(form,
                   dispformula=~trtGp+poly(TrtTime,3), control=ctl,
                   family=betabinomial(link="cloglog"), data=HawCon)
 HCbb2s.cll <- update(HCbb.cll, 
@@ -219,17 +223,36 @@ HCbb2s.cll <- update(HCbb.cll,
 HCbb.logit <- update(HCbb.cll, family=betabinomial(link="logit"))
 HCbb2s.logit <- update(HCbb.logit,
                      formula=.~.+poly(TrtTime,2)[,-1]+(TrtTime|rep))
+## family(HCbb.cll)$link
+## family(HCqb.glm)$link
 ```
 
-```{r cap5, echo=FALSE}
-cap5 <- "Fitted lines and quadratic curves, for the models where the
+```{r cap3}
+cap3 <- "Diagnostics for model with binomial errors and observation level
+random effects."
+```
+
+```{r DHARMa-obs, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap3,eval=FALSE}
+formObs <- cbind(Dead,Live)~0+trtGp/TrtTime+(obs)+(TrtTime|rep)
+HCbi.cll <- glmmTMB(formObs, control=ctl,
+                  family=binomial(link="cloglog"), data=HawCon)
+set.seed(29)
+simRef <- simulateResiduals(HCbi.cll, n=250, seed=FALSE)
+plotQQunif(simRef)
+plotResiduals(simRef)
+plotResiduals(simRef, form=log(HawCon$Total), xlab="log(Total)")
+```
+
+
+```{r cap4, echo=FALSE}
+cap4 <- "Fitted lines and quadratic curves, for the models where the
 treatment effect is modeled as a quadratic function of time.
 Panel A is for the model that uses a complementary log-log
 (cloglog) link, while Panel B is for a logit link. The quadratic
 curves are shown in attenuated colors."
 ```
 
-```{r glmmTMB-altFits-gph, fig.width=9, fig.height=4.5, fig.show='hold', top=2, out.width="100%",  fig.align='center', message=FALSE, fig.cap=cap5, echo=FALSE}
+```{r glmmTMB-altFits-gph, fig.width=9, fig.height=4.5, fig.show='hold', top=2, out.width="100%",  fig.align='center', message=FALSE, fig.cap=cap4, echo=FALSE}
 library(lattice)
 my.panel.bands <- function(x, y, upper, lower, fill, col,
                            subscripts, ..., font, fontface)
@@ -400,14 +423,14 @@ Figure \@ref(fig:DHARMa) shows the diagnostic plots for the linear model
 with a complementary log-log link. These are then used to replace the
 residuals from the model with quantile residuals.
 
-```{r cap7, echo=FALSE} 
-cap7 <- "Panel A shows the
+```{r cap6, echo=FALSE} 
+cap6 <- "Panel A shows the
 quantile-quantile plot.  Panel B plots estimated quantiles
 against mortality, while Panel C plots estimated quantiles
 against total number, on a logarithmic scale."
 ```
 
-```{r DHARMa, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap7}
+```{r DHARMa, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap6}
 set.seed(29)
 simRef <- simulateResiduals(HCbb.cll, n=250, seed=FALSE)
 plotQQunif(simRef)
@@ -432,11 +455,11 @@ shorten <- function(nam, leaveout=c('trtGp','Fly',':')){
 }
 ```
 
-```{r cap8, echo=FALSE}
-cap8 <- "Quantile residuals, by treatment group."
+```{r cap7, echo=FALSE}
+cap7 <- "Quantile residuals, by treatment group."
 ```
 
-```{r residBYgp, echo=FALSE, fig.width=5, fig.asp=0.7, bot=-2.5, warning=FALSE, fig.align='center', fig.show="hold", message=FALSE, out.width="49%", echo=FALSE, fig.cap=cap8}
+```{r residBYgp, echo=FALSE, fig.width=5, fig.asp=0.7, bot=-2.5, warning=FALSE, fig.align='center', fig.show="hold", message=FALSE, out.width="49%", echo=FALSE, fig.cap=cap7}
 simRes <- DHARMa::simulateResiduals(HCbb.cll, n=250)
 dotplot(scaledResiduals~HawCon$trtGp, data=simRes, 
         scales=list(x=list(rot=30)), ylab="Quantile Residuals",
@@ -479,13 +502,13 @@ and mortalities than at the extremes.
 Figure \@ref(fig:glmmTMB-altFits-gph-disp)C shows the dispersion factor 
 estimates that correspond to the estimates of \(\rho\) in Panel A.
 
-```{r cap6, echo=FALSE}
-cap6 <- "Panels A and B show intra-class correlation estimates 
+```{r cap8, echo=FALSE}
+cap8 <- "Panels A and B show intra-class correlation estimates 
 for, respectively, a complementary log-log link and a logit link. 
 Both models assume a betabinomial error."
 ```
 
-```{r glmmTMB-altFits-gph-disp, fig.width=9, fig.height=3.5, top=2, out.width="100%",  fig.align='center', fig.show="hold", fig.cap=cap6, echo=FALSE}
+```{r glmmTMB-altFits-gph-disp, fig.width=9, fig.height=3.5, top=2, out.width="100%",  fig.align='center', fig.show="hold", fig.cap=cap8, echo=FALSE}
 parset <- simpleTheme(col=rep(1:4,rep(2,4)),pch=rep(c(1,2), 4), lwd=2)
 HawCon$rho2clog <- qra::getRho(HCbb.cll)
 HawCon$dispClog <- with(HawCon, 1+(Total-1)*rho2clog)
@@ -673,7 +696,7 @@ rownames(HCgauss.LTcll) <- shorten(rownames(HCgauss.LTcll))
 
 A further model that might be tried is a linear mixed model, 
 with \(log(1-log((p+0.002)/(1+0.004)))\) as the dependent 
-variable, complementary log-log link, and gaussian error.
+variable (complementary log-log link), and gaussian error.
 Figure \@ref(fig:Gauss-simRes)  shows the plot of residuals versus
 predicted quantile deviations.
 
