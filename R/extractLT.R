@@ -76,7 +76,6 @@ extractLT <-
            eps=0,
            offset=0,
            df.t=NULL){
-
   if(is.null(link))link <- family(obj)[['link']]
   if(inherits(obj,'lm')){
     if(is.null(df.t))df.t <- summary(obj)$df.residual

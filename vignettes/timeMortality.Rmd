@@ -229,9 +229,26 @@ HCbb2s.logit <- update(HCbb.logit,
 ## family(HCqb.glm)$link
 ```
 
-
 ## A comparison of fitted values and confidence intervals
  
+```{r cap3}
+cap3 <- "Diagnostics for model with binomial errors and observation level
+random effects."
+```
+
+```{r DHARMa-obs, fig.width=3.75, fig.asp=0.95, bot=-1, top=1.5, out.width="32%",  fig.align='center', fig.show="hold", message=FALSE, echo=FALSE, mar=c(3.1,3.1,2.6,1.1), fig.cap=cap3,eval=FALSE}
+formObs <- cbind(Dead,Live)~0+trtGp/TrtTime+(obs)+(TrtTime|rep)
+HCbi.cll <- glmmTMB(formObs, control=ctl,
+                  family=binomial(link="cloglog"), data=HawCon)
+set.seed(29)
+simRef <- simulateResiduals(HCbi.cll, n=250, seed=FALSE)
+plotQQunif(simRef)
+plotResiduals(simRef)
+plotResiduals(simRef, form=log(HawCon$Total), xlab="log(Total)")
+```
+
+
+>>>>>>> 75b231735546e15ea0923aff5b77c29517048355
 ```{r cap4, echo=FALSE}
 cap4 <- "Fitted lines and quadratic curves, for the models where the
 treatment effect is modeled as a quadratic function of time.
