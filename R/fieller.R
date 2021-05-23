@@ -96,7 +96,6 @@ fieller <-
     else tt <- stats::qt(0.975, df.t)
     if(type[1] == "Fieller") g <- (tt/b[2])^2 * v22 else
       if(type[1] == "Delta") g <- 0 else g <- (tt/b[2])^2 * v22
-    browser()
     if (g > maxg || g < 0) {
       m <- unscale(m, offset, logscale=logscale)
       return(c(estval = m, var = v, lower = NA, upper = NA,
