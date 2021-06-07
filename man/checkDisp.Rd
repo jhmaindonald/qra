@@ -26,15 +26,14 @@ determined using the function \code{\link{scaleLocAdjust}}, have been
 in adjusting for heterogenous variances.
 }
 \examples{
-royal <- subset(DAAG::codling,
-                 Cultivar=="ROYAL"&year==1988)
-royal.glm <- glm(pobs~ct, data=royal,
-                  family=quasibinomial(link='cloglog'))
-royalFix <- scaleLocAdjust(royal.glm, lambda=2)
+royal <- subset(qra::codling1988, Cultivar=="ROYAL")
+royal.glm <- glm(cbind(dead,total-dead)~ct, data=royal,
+                 family=quasibinomial(link='cloglog'))
+royalFix <- qra::scaleLocAdjust(royal.glm, lambda=2)
 ## Check range of indicated prior weights
 range(royalFix[[2]])
 ## Range of updated dispersion estimates
 range(summary(royalFix[[1]])[['dispersion']]/royalFix[[2]])
-xy <- checkDisp(royalFix[[1]])
+xy <- qra::checkDisp(royalFix[[1]])
 plot(xy)
 }

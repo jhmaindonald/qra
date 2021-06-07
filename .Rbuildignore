@@ -1,5 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ReadMe
-^vignettes/Untitled*
+^vignettes/timeMortality.pdf
 id_rsa.pub
+^\.DS_Store$
+^id_rsa\.pub$
+log$
+^vignettes/Untitled\.Rmd$
+^vignettes/Untitled1\.Rmd$

@@ -2,7 +2,7 @@
 % Please edit documentation in R/graphSum.R
 \name{graphSum}
 \alias{graphSum}
-\title{Draw graphs of insect mortality data}
+\title{Draw graphs of insect mortality or other exposure-response data}
 \usage{
 graphSum(
   df,
@@ -77,6 +77,9 @@ to accommodate points for mortalities of 0 and 1.}
 \item{ylabel}{If not \code{NULL}, $y$-axis label}
 
 \item{ytiklab}{Place $y$ axis tiks and labels at these mortalities}
+}
+\value{
+{No return value, called for side effects}
 }
 \description{
 Datasets that are in mind hold, for each replicate of

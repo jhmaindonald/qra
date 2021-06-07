@@ -62,9 +62,9 @@ the transformation.}
 Delta (\code{type="Delta"}) method, which relies on a first
 order Taylor series approximation to the variance, is
 provided so that it can be used for comparative purposes.
-It can be reliably used only in those cases where the
-interval is essentially the same as given by
-\code{type="Fieller"}.}
+It can be reliably used only in cases where the interval
+has been shown to be essentially the same as given by
+\code{type="Fieller"}!}
 
 \item{maxg}{Maximum value of \code{g} for which a
 confidence interval will be calculated. Must be \code{< 1}.}
@@ -91,10 +91,19 @@ interval for a specified mortality proportion, commonly
 any measure of intensity of a treatment that is designed
 to induce insect death.
 }
+\details{
+See the internal code for details of the value \code{g}.
+The calculation gives increasing wide confidence intervals as
+\code{g} approaches 1.  If \eqn{g>=1}, there are no limits.
+The default value for \code{df.t} is a rough guess at what
+might be reasonable. For models fitted using \code{lme4::lmer()},
+abilities in the \pkg{lmerTest} package can be used to determine
+a suitable degrees of freedom approximation --- this does not
+extend to use with \code{glmer()} or \code{glmmTMB}.
+}
 \examples{
-redDel <- subset(DAAG::codling,
-                 Cultivar=="Red Delicious"&year==1988)
-redDel.glm <- glm(pobs~ct, data=redDel,
+redDel <- subset(qra::codling1988, Cultivar=="Red Delicious")
+redDel.glm <- glm(cbind(dead,total-dead)~ct, data=redDel,
                   family=quasibinomial(link='cloglog'))
 vv <- summary(redDel.glm)$cov.scaled
 fieller(0.99, b=coef(redDel.glm), vv=vv, link='cloglog')

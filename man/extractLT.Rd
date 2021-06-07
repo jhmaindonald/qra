@@ -84,20 +84,10 @@ corresponding slopes.  These replace the arguments `nEsts`
 (subscripts for slopes were `(nEsts+1):(nEsts+slopeAdd)`).
 }
 \examples{
-if(requireNamespace('glmmTMB', quietly=TRUE)){
-HawCon <- qra::HawCon
-CCnum <- match("CommonName", names(HawCon))
-names(HawCon)[CCnum] <- "CN"
-HawCon <- within(HawCon, {
- trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
- rep <- paste0(CN,LifestageTrt,":",RepNumber)
-})
-form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep)
-ctl <- glmmTMB::glmmTMBControl(optimizer=optim, optArgs=list(method="BFGS"))
-HCbb.cll <- glmmTMB::glmmTMB(form,
-                    dispformula=~trtGp+poly(TrtTime,3), control=ctl,
-                    family=glmmTMB::betabinomial(link="cloglog"),
-                    data=HawCon)
-extractLT(HCbb.cll, a=1:8, b=9:16)
-}
+form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
+codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
+  family=glmmTMB::betabinomial(link='cloglog'),
+  dispformula=~0+Cultivar/splines::ns(dose,2),
+  data=subset(codling1989,dose>0))
+round(qra::extractLT(codling1989.TMB, a=1:3, 4:6),1)
 }

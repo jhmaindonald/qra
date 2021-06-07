@@ -8,7 +8,8 @@ model object with beta-binomial error.}
 getRho(obj, varMult = FALSE)
 }
 \arguments{
-\item{obj}{\pkg{glmmTMB} model object with betabinomial error}
+\item{obj}{\pkg{glmmTMB} model object with betabinomial error,
+and with a `dispformula` argument supplied.}
 
 \item{varMult}{If \code{TRUE} return, in addition to \code{rho},
 the factor \code{mult} by which the variance is inflated
@@ -16,7 +17,7 @@ relative to the binomial.}
 }
 \value{
 if \code{varMult==FALSE} return (as a vector) the estimates
-of \eqn{\rho}, else (\code{varMult==FALSE}), else return
+\eqn{\rho}, else (\code{varMult==TRUE})  return
 \code{list(rho, mult)}.
 }
 \description{
@@ -25,13 +26,15 @@ The intra-class correlation is calculated as
   estimate given by the formula specified in the argument
   \code{dispformula}.
 }
-\examples{
-{
-codling1988 <- qra::codling1988
-codling1988$gp <- with(codling1988, paste0(Cultivar,rep))
-ge16xl.TMB <- glmmTMB::glmmTMB(formula=cbind(dead,total-dead)~0+Cultivar/dose+(1|gp),
-dispformula=~Cultivar+poly(dose,2), family=glmmTMB::betabinomial(link='logit'),
-data=subset(codling1988,dose>=16))
-rho <- getRho(ge16xl.TMB)
+\details{
+The variance for the betabinomial model is then
+obtained by multiplying the binomial variance by
+\eqn{1+(n-1)\rho}, where $n$ is the binomial `size`.
 }
+\examples{
+form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
+codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
+  family=glmmTMB::betabinomial(link='cloglog'),
+  dispformula=~0+Cultivar/splines::ns(dose,2), data=qra::codling1989)
+rho <- getRho(codling1989.TMB)
 }

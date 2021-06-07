@@ -6,6 +6,10 @@
 #' update the model.  A value of \code{lambda} that is a little more
 #' than 2.0 has often worked well.
 #'
+#' This function is primarily for experimental use, in investigating
+#' possible ways to model a dispersion factor that varies with the
+#' fitted value.
+#'
 #' @param x Model fitted using \code{glm} or, possibly \code{lm}
 #' @param lambda Power of smooth of square roots of absolute
 #' values of residuals, to try for values whose inverses will
@@ -31,16 +35,14 @@
 #'
 #' @importFrom stats influence loess predict residuals
 #' update weights deviance df.residual
-#' @importFrom car ellipse
 #'
 #' @export
 #'
 #' @examples
-#' redDel <- subset(DAAG::codling,
-#'                  Cultivar=="ROYAL"&year==1988)
-#' ROYAL.glm <- glm(pobs~ct, data=redDel,
+#' ROYAL <- subset(qra::codling1988, Cultivar=="ROYAL")
+#' ROYAL.glm <- glm(cbind(dead,total-dead)~ct, data=ROYAL,
 #'                   family=quasibinomial(link='cloglog'))
-#' ROYALFix <- scaleLocAdjust(ROYAL.glm)
+#' ROYALFix <- qra::scaleLocAdjust(ROYAL.glm)
 #' ## Check range of indicated prior weights
 #' range(ROYALFix[[2]])
 #' ## Range of updated dispersion estimates

@@ -1,4 +1,4 @@
-#' Draw graphs of insect mortality data
+#' Draw graphs of insect mortality or other exposure-response data
 #'
 #' Datasets that are in mind hold, for each replicate of
 #' each combination of each of a several factors (e.g.,
@@ -36,6 +36,8 @@
 #' @param xlab Expression specifying x-axis label
 #' @param ylabel If not \code{NULL}, $y$-axis label
 #' @param ytiklab Place $y$ axis tiks and labels at these mortalities
+#'
+#' @return{No return value, called for side effects}
 #'
 #' @import ggplot2
 #'
@@ -137,14 +139,14 @@ graphSum <- function(df, subSet=NULL,
     if(fitRep%in%names(ds)){
     gg0<-gg0+geom_line(aes_(as.name(dosevar),as.name(fitRep),
                             color=as.name(Rep)), alpha=0.4,na.rm=T)
-    } else print(paste("Column",fitRep,"was not found"))
+    } else stop(paste("Column",fitRep,"was not found"))
   }
   if(!is.null(fitPanel)){
     if(fitPanel%in%names(ds)){
     gg0 <- gg0+
       geom_line(aes_(as.name(dosevar),as.name(fitPanel)),
                 color="gray",size=ptSize, alpha=0.4, na.rm=T)
-    } else print(paste("Column",fitPanel,"was not found"))
+    } else stop(paste("Column",fitPanel,"was not found"))
 }
 if(!is.null(byFacet)) gg0 <- gg0+facet_grid(byFacet)
 gg0 <- gg0+

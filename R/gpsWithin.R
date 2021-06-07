@@ -15,8 +15,8 @@
 #' @export
 #'
 #' @examples
-#' repnum <- with(DAAG::codling, gpsWithin(gp, list(Cultivar,year)))
-#' table(repnum)
+#' repnum <- with(qra::codling1988, gpsWithin(cultRep, Cultivar))
+#' table(codling1988$Cultivar,repnum)
 #'
 gpsWithin <- function(x,f){
   z <- lapply(split(x,f), function(x)match(x,unique(x)))

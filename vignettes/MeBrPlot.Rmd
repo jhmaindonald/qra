@@ -16,27 +16,11 @@ library(glmmTMB)
 ```
 
 ## Plot data
-```{r plot}
-codling <- DAAG::codling
-num1 <- match(unique(codling$gp),codling$gp)
-rnum <- rep(1, nrow(codling))
-rnum[num1] <- 2
-nnew <- rep(1:nrow(codling),rnum)
-nctl <- match(num1,nnew)
-codling0 <- codling[nnew,]
-codling0[nctl,c('dose','tot','dead','pobs','cm','ct')] <-
-  with(codling0[nctl,], cbind(rep(0,length(num1)), numcm, round(cm*numcm), 
-       cm,rep(NA,length(num1)),rep(0,length(num1))))     
-
-codling0[["logCT"]] <- log(codling0[["ct"]])
-codling0[["Rep"]] <- with(codling0, qra::gpsWithin(gp, list(Cultivar,year)))
-```
 
 # Plot 1988 and 1989 data separately
 ```{r y1988, fig.width=7, fig.height=2.5, eval=TRUE, out.width='100%'}
-graphSum(df=codling0, subSet=expression(year==1988),
-                     link="cloglog", logScale=FALSE,
-                     dead="dead", tot="tot", dosevar="ct", Rep="Rep",
+graphSum(df=qra::codling1988, link="cloglog", logScale=FALSE,
+                     dead="dead", tot="total", dosevar="ct", Rep="rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",
@@ -44,9 +28,8 @@ graphSum(df=codling0, subSet=expression(year==1988),
 ```
 
 ```{r y1989, fig.width=6.5, fig.height=2.5, out.width="80%", eval=TRUE}
-graphSum(df=codling0, subSet=expression(year==1989),
-                     link="cloglog", logScale=FALSE,
-                     dead="dead", tot="tot", dosevar="ct", Rep="Rep",
+qra::graphSum(df=qra::codling1989, link="cloglog", logScale=FALSE,
+                     dead="dead", tot="total", dosevar="ct", Rep="rep",
                      fitRep=NULL, fitPanel=NULL,
                      byFacet=~Cultivar,
                      maint="Codling moth, MeBr",
@@ -54,53 +37,51 @@ graphSum(df=codling0, subSet=expression(year==1989),
 ```
 ## Correct for control mortality
 
-```{r yr88, fig.width=6.5, fig.height=2.25, out.width="80%"}
+```{r yr88, fig.width=6.5, fig.height=2.25, out.width="98%"}
 library(lattice)
 cloglog <- make.link("cloglog")$linkfun
-codling88  <- droplevels(subset(DAAG::codling, year==1988))
-codling88 <- within(codling88, apobs <- (pobs-cm)/(1-cm))
+cod88 <- subset(qra::codling1988, dose>0)
+cm88 <- subset(qra::codling1988, dose==0)
+cmMatch <- match(cod88$cultRep,cm88$cultRep)
+cod88$cm <- cm88[cmMatch,'PropDead']
+cod88$apobs <- with(cod88, (PropDead-cm)/(1-cm))
 # ctl <- glmmTMBControl(optimizer=optim,
 #                       optArgs=list(method="BFGS"))
 # codling88.BB2 <- glmmTMB(cbind(dead,tot-dead)~0+
 #                            Cultivar/poly(ct,2)+(ct|gp),
 #                            family=betabinomial(link='cloglog'),
 #                            data=codling88, control=ctl)
-codling88[["Rep"]] <- with(codling88, qra::gpsWithin(gp, list(Cultivar,year)))
-xyplot(cloglog(apobs)~ct|Cultivar, groups=Rep, data=codling88)
+xyplot(cloglog(apobs)~ct|Cultivar, groups=rep, 
+       data=subset(cod88, apobs>0), layout=c(5,1))
 ```
 
-```{r yr89, fig.asp=1, out.width="30%"}
-codling89  <- droplevels(subset(DAAG::codling, year==1989))
-codling89 <- within(codling89, apobs <- (pobs-cm)/(1-cm))
-codling89[["Rep"]] <- with(codling89, qra::gpsWithin(gp, list(Cultivar,year)))
-xyplot(cloglog(apobs)~ct|Cultivar, groups=Rep, data=codling89)
+```{r yr89, fig.asp=1, out.width="60%"}
+cod89 <- subset(qra::codling1989, dose>0)
+cm89 <- subset(qra::codling1989, dose==0)
+cmMatch <- match(cod89$cultRep,cm89$cultRep)
+cod89$cm <- cm89[cmMatch,'PropDead']
+cod89$apobs <- with(cod89, (PropDead-cm)/(1-cm))
+xyplot(cloglog(apobs)~ct|Cultivar, groups=rep, data=cod89, layout=c(3,1))
 ```
 
 We now check the consistency of control mortality estimates
 across and within cultivars.
 
 ```{r cm}
-cmDF <- DAAG::codling[, c('year','Cultivar',
-                         'dead','tot', 'cm','numcm','gp')]
-cmDF$Rep <- qra::gpsWithin(cmDF$gp,cmDF$Cultivar)
-cmDF <- cmDF[match(unique(cmDF$gp),cmDF$gp),]
-cmDF$cmdead <- with(cmDF, round(numcm*cm))
-cmDF88 <- subset(cmDF, year==1988)
-cmDF89 <- subset(cmDF, year==1989)
 ctl <- glmmTMBControl(optimizer=optim,
                       optArgs=list(method="BFGS"))
-cm88.TMB <- glmmTMB(cbind(cmdead,numcm-cmdead)~Cultivar,
+cm88.TMB <- glmmTMB(cbind(dead,total-dead)~Cultivar,
                family=betabinomial(link='logit'), 
-               subset(cmDF,year==1988))
-cm88.glm <- glm(cbind(cmdead,numcm-cmdead)~Cultivar, 
+               data=cm88)
+cm88.glm <- glm(cbind(dead,total-dead)~Cultivar, 
                family=quasibinomial(link='logit'), 
-               data=subset(cmDF,year==1988))
-cm89.TMB <- glmmTMB(cbind(cmdead,numcm-cmdead)~Cultivar, 
+               data=cm88)
+cm89.TMB <- glmmTMB(cbind(dead,total-dead)~Cultivar, 
                    family=betabinomial(link='logit'), 
-                   data=subset(cmDF,year==1989))
-cm89.glm <- glm(cbind(cmdead,numcm-cmdead)~Cultivar, 
+                   data=cm89)
+cm89.glm <- glm(cbind(dead,total-dead)~Cultivar, 
                 family=quasibinomial(link='logit'), 
-                data=subset(cmDF,year==1989))
+                data=cm89)
 ```
 
 The following shows the range of estimated variance multipliers
@@ -113,12 +94,12 @@ mults <- matrix(nrow=2, ncol=6)
 dimnames(mults) <- list(c('88','89'),c('phi','nmin','nmax',
                                        'Phimin','Phimax','PhiGLM'))
 phi88 <- sigma(cm88.TMB)
-nrange <- range(subset(cmDF,year==1988)$numcm)
+nrange <- range(cm88$total)
 Phirange <- 1+phi88^{-1}*(nrange-1)
 mults['88',] <- c(phi88, nrange, Phirange, 
                   summary(cm88.glm)$dispersion)
 phi89 <- sigma(cm89.TMB)
-nrange <- range(subset(cmDF,year==1989)$numcm)
+nrange <- range(cm89$total)
 Phirange <- 1+phi89^{-1}*(nrange-1)
 mults['89',] <- c(phi89, nrange, Phirange, 
                   summary(cm89.glm)$dispersion)
@@ -127,7 +108,7 @@ round(mults,2)
 
 The estimates of $\phi$ (`sigma`) are 1988: `r round(phi88^-1,6)`; and 1989: `r round(phi89^-1,5)` .  Although very small, multiplication by
 values of $n$ that are in the thousands lead to a variance multiplier
-that is noticeably greater than 1.0 on 1988, and substantial ijn 1989.
+that is noticeably greater than 1.0 on 1988, and substantial in 1989.
 
 Now fit a model for the 1989 control mortality data that allows the 
 betabinomial dispersion parameter to be different for the
@@ -139,8 +120,8 @@ present purposes.)
 ```{r more-on-cm89}
 cm89d.TMB <- update(cm89.TMB, dispformula=~0+Cultivar,    
                    control=ctl)
-nranges <- with(subset(cmDF,year==1989),
-                sapply(split(numcm,Cultivar),range))
+nranges <- with(cm89,
+                sapply(split(total,Cultivar),range))
 phi89d <- exp(coef(summary(cm89d.TMB))$disp[,1])
 Phiranges <- 1+t(nranges-1)*phi89d^-1
 colnames(Phiranges) <- c("Min","Max")
@@ -157,16 +138,16 @@ on the logarithmic link scale, standard errors, z values,
 and $p$-values.)
 
 ```{r cmDF88-cults}
-cults <- unique(cmDF88$Cultivar)
+cults <- unique(cm88$Cultivar)
 mat <- matrix(nrow=length(cults),ncol=5)
 dimnames(mat) <- list(cults,
                       c("phi","nmin","nmax","PhiMin","PhiMax"))
 for(cult in cults){
-df <- subset(cmDF88, cult==Cultivar)
-obj <- glmmTMB(cbind(dead,tot-dead)~1,       
+df <- subset(cm88, cult==Cultivar)
+obj <- glmmTMB(cbind(dead,total-dead)~1, control=ctl,      
                family=betabinomial(link='logit'), data=df)
 phi <- sigma(obj)
-nrange <- range(df$numcm)
+nrange <- range(df$total)
 mat[cult,] <- c(phi, nrange, 1+(nrange-1)*phi^-1)
 }
 round(mat,1)

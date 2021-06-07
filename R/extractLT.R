@@ -41,27 +41,18 @@
 #'
 #' @return Matrix holding LD or LD estimates.
 #' @examples
-#' if(requireNamespace('glmmTMB', quietly=TRUE)){
-#' HawCon <- qra::HawCon
-#' CCnum <- match("CommonName", names(HawCon))
-#' names(HawCon)[CCnum] <- "CN"
-#' HawCon <- within(HawCon, {
-#'  trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
-#'  rep <- paste0(CN,LifestageTrt,":",RepNumber)
-#' })
-#' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(TrtTime|rep)
-#' ctl <- glmmTMB::glmmTMBControl(optimizer=optim, optArgs=list(method="BFGS"))
-#' HCbb.cll <- glmmTMB::glmmTMB(form,
-#'                     dispformula=~trtGp+poly(TrtTime,3), control=ctl,
-#'                     family=glmmTMB::betabinomial(link="cloglog"),
-#'                     data=HawCon)
-#' extractLT(HCbb.cll, a=1:8, b=9:16)
-#' }
+#' form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
+#' codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
+#'   family=glmmTMB::betabinomial(link='cloglog'),
+#'   dispformula=~0+Cultivar/splines::ns(dose,2),
+#'   data=subset(codling1989,dose>0))
+#' round(qra::extractLT(codling1989.TMB, a=1:3, 4:6),1)
 
 #' @export
 #'
 #' @importFrom stats coef vcov family
 #' @importFrom lme4 fixef
+#' @importFrom splines ns
 #
 #' @rdname extractLT
 #' @export
@@ -91,8 +82,7 @@ extractLT <-
     varfun <- function(x)vcov(x)[["cond"]]
   } else {
     cl <- class(obj)
-    print(paste("No provision for object of class",cl))
-    return()
+    stop(paste("No provision for object of class",cl))
   }
   pAdj <- (p+eps)/(1+2*eps)
   blmm <- bfun(obj)
@@ -105,7 +95,7 @@ extractLT <-
     mess <- c("Lengths of a and b differ", "Intercepts do not match slopes")
     stop(mess[check])
   }
-  if(is.null(df.t))df.t <- as.numeric(ngrps[length(ngrps)]-length(blmm))
+  if(is.null(df.t))df.t <- as.numeric(ngrps[length(ngrps)]-1)
   xCentile <- matrix(0, nrow=length(a), ncol=4,
                    dimnames=list(names(blmm)[1:length(a)],
                                  c("est", "var", "lwr", "upr")))

@@ -19,7 +19,13 @@ where \code{a} is \code{mean(x)} and \code{b} is \code{sd(x)}.
 The quantities \code{a} and \code{b} are available as attributes
 of the object that is returned.
 }
+\details{
+Use of a scaled explanatory variable can be helpful in getting a
+model to fit.  The scaling coefficient(s) will then be needed when
+the fitted model is used with explanatory variable values on the
+original scale.
+}
 \examples{
 z <- scale(1:10)
-getScaleCoef(z)
+qra::getScaleCoef(z)
 }
