@@ -86,5 +86,5 @@ Datasets that are in mind hold, for each replicate of
 each combination of each of a several factors (e.g.,
 species, lifestages, temperatures), mortalities for
 each of a number of values of "dose".  See for example
-the dataset help page \code{\link[DAAG]{codling}}.
+the dataset help page \code{\link[qra]{codling1989}}.
 }

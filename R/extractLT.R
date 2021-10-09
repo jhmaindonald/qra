@@ -2,16 +2,16 @@
 #'
 #' @description When supplied with a model object that has fitted
 #' dose-response lines for each of several levels of a factor,
-#' `extractLT` calls the function `fieller` to calculate lethal time
+#' \code{extractLT} calls the function \code{fieller} to calculate lethal time
 #` or lethal dose or other such estimates.
 #'
-#' @details Fixed coefficients from `obj` must be for intercepts and
-#' for slopes.  Starting the model formula with `0+` will commonly
-#' do what is required. The coefficients `fixef(obj)[a]` are assumed
-#' to specify line intercepts, while `fixef(obj)[b]` specify the
-#' corresponding slopes.  These replace the arguments `nEsts`
-#' (subscripts for intercepts were `1:nEsts`) and `slopeAdd`
-#' (subscripts for slopes were `(nEsts+1):(nEsts+slopeAdd)`).
+#' @details Fixed coefficients from \code{obj} must be for intercepts and
+#' for slopes.  Starting the model formula with \code{0+} will commonly
+#' do what is required. The coefficients \code{fixef(obj)[a]} are assumed
+#' to specify line intercepts, while \code{fixef(obj)[b] specify the
+#' corresponding slopes.  These replace the arguments \code{nEsts}
+#' (subscripts for intercepts were \code{1:nEsts) and \code{slopeAdd}
+#' (subscripts for slopes were \code{(nEsts+1):(nEsts+slopeAdd)}).
 #'
 #' @param obj \code{merMod} object, created using \code{lmer()} or
 #' \code{glmerMod} object, created using \code{glmer()}.
@@ -20,10 +20,10 @@
 #' @param link Link function, for use with objects where no
 #' link was specified in the function call, but it is required
 #' to back-transform a transformation that was performed prior
-#' to the function call.  Otherwise leave as `link=NULL`, and
-#' the link function will be extracted as `family(obj)[['link']]`.
-#' For a folded power function, with `extractLTpwr()`, the only
-#' available link is "fpower", and the exponent `lambda` must be
+#' to the function call.  Otherwise leave as \code{link=NULL}, and
+#' the link function will be extracted as \code{family(obj)[['link']]}.
+#' For a folded power function, with \code{extractLTpwr()}, the only
+#' available link is \code{fpower}, and the exponent \code{lambda} must be
 #' specified.
 #' @param logscale Logical.  Specify \code{TRUE}, if LT values are
 #' to be back-transformed from a logarithmic scale.
@@ -37,17 +37,26 @@
 #' for `t` or `z` statistics.  If NULL, a conservative (low) value will
 #' be used.  For linear (but not generalized linear) models and mixed
 #' models, approximations are implemented in the \pkg{afex} package.
-#'  See `vignette('introduction-mixed-models', package='afex')`, page 19.
+#'  See \code{vignette('introduction-mixed-models', package="afex")}, page 19.
 #'
 #' @return Matrix holding LD or LD estimates.
 #' @examples
-#' form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
-#' codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
-#'   family=glmmTMB::betabinomial(link='cloglog'),
-#'   dispformula=~0+Cultivar/splines::ns(dose,2),
-#'   data=subset(codling1989,dose>0))
-#' round(qra::extractLT(codling1989.TMB, a=1:3, 4:6),1)
-
+#' pcheck <- suppressWarnings(requireNamespace(pkg, quietly = TRUE))
+#' if(pcheck) pcheck & packageVersion("glmmTMB") >= "1.1.2"
+#' if(pcheck){
+#' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(1|trtGpRep)
+#' HawMed <- droplevels(subset(HawCon, CN=="MedFly"))
+#' HawMed <- within(HawMed,
+#'                  {trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
+#'                  trtGpRep <- paste0(CN,LifestageTrt,":",RepNumber)
+#'                  scTime <- scale(TrtTime) })
+#' HawMedbb.cll <- glmmTMB::glmmTMB(form, dispformula=~trtGp+splines::ns(scTime,2),
+#'                                  family=glmmTMB::betabinomial(link="cloglog"),
+#'                                  data=HawMed)
+#' round(qra::extractLT(p=0.99, obj=HawMedbb.cll, link="cloglog",
+#'                a=1:4, b=5:8, eps=0, df.t=NULL)[,-2], 2)} else
+#' message("Example requites `glmmTMB` version >= 1.1.2: not available")
+#'
 #' @export
 #'
 #' @importFrom stats coef vcov family

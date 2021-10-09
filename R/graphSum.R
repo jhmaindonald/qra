@@ -4,7 +4,7 @@
 #' each combination of each of a several factors (e.g.,
 #' species, lifestages, temperatures), mortalities for
 #' each of a number of values of "dose".  See for example
-#' the dataset help page \code{\link[DAAG]{codling}}.
+#' the dataset help page \code{\link[qra]{codling1989}}.
 #'
 #' @param df Data frame from which data will be taken
 #' @param subSet NULL, or an expression, such  as for example
@@ -38,12 +38,6 @@
 #' @param ytiklab Place $y$ axis tiks and labels at these mortalities
 #'
 #' @return{No return value, called for side effects}
-#'
-#' @import ggplot2
-#'
-#' @importFrom stats make.link
-#'
-#' @importFrom lattice xyplot
 #'
 #' @export
 graphSum <- function(df, subSet=NULL,
@@ -128,37 +122,37 @@ graphSum <- function(df, subSet=NULL,
   x <- rep(zeroDosePos,2)
   ctlLine <- data.frame(x=x,y=ran)
   if(!is.null(Rep))
-  gg0 <- ggplot(ds)+geom_point(aes_(as.name(dosevar), ~y, shape=~pointType,
+  gg0 <- ggplot2::ggplot(ds)+ggplot2::geom_point(ggplot2::aes_(as.name(dosevar), ~y, shape=~pointType,
                                    color=as.name(Rep)), size=ptSize) else
-  gg0 <- ggplot(ds)+geom_point(aes_(as.name(dosevar), ~y, shape=~pointType),
+  gg0 <- ggplot2::ggplot(ds)+ggplot2::geom_point(ggplot2::aes_(as.name(dosevar), ~y, shape=~pointType),
                                size=ptSize)
-  gg0 <- gg0 + scale_shape_manual(values=plotChar) +
-    geom_line(aes(x,y), size=1.5*ptSize, alpha=0.4, color="gray",
+  gg0 <- gg0 + ggplot2::scale_shape_manual(values=plotChar) +
+    ggplot2::geom_line(ggplot2::aes(x,y), size=1.5*ptSize, alpha=0.4, color="gray",
               data=ctlLine)
   if(!is.null(fitRep)){
     if(fitRep%in%names(ds)){
-    gg0<-gg0+geom_line(aes_(as.name(dosevar),as.name(fitRep),
+    gg0<-gg0+ggplot2::geom_line(ggplot2::aes_(as.name(dosevar),as.name(fitRep),
                             color=as.name(Rep)), alpha=0.4,na.rm=T)
     } else stop(paste("Column",fitRep,"was not found"))
   }
   if(!is.null(fitPanel)){
     if(fitPanel%in%names(ds)){
     gg0 <- gg0+
-      geom_line(aes_(as.name(dosevar),as.name(fitPanel)),
+      ggplot2::geom_line(ggplot2::aes_(as.name(dosevar),as.name(fitPanel)),
                 color="gray",size=ptSize, alpha=0.4, na.rm=T)
     } else stop(paste("Column",fitPanel,"was not found"))
 }
-if(!is.null(byFacet)) gg0 <- gg0+facet_grid(byFacet)
+if(!is.null(byFacet)) gg0 <- gg0+ggplot2::facet_grid(byFacet)
 gg0 <- gg0+
-    xlab(xlab)+ ylab(ylabel)+
-    ggtitle(paste0(maint, addtxt))+
-    theme(axis.title=element_text(size=13,face="bold"),
-          axis.text.x = element_text(color = "brown"),
-          plot.title=element_text(size=13)) +
-  scale_x_continuous(breaks=xtik, labels=paste(xaxlab))+
-  scale_y_continuous(breaks=ytik, labels=paste(ytiklab)) +
-  coord_cartesian(ylim=yUser)
-if(!is.null(layout))gg0 <- gg0 + facet_grid(layout)
+  ggplot2::xlab(xlab)+ ggplot2::ylab(ylabel)+
+  ggplot2::ggtitle(paste0(maint, addtxt))+
+  ggplot2:: theme(axis.title=ggplot2::element_text(size=13,face="bold"),
+          axis.text.x = ggplot2::element_text(color = "brown"),
+          plot.title=ggplot2::element_text(size=13)) +
+  ggplot2::scale_x_continuous(breaks=xtik, labels=paste(xaxlab))+
+  ggplot2:: scale_y_continuous(breaks=ytik, labels=paste(ytiklab)) +
+  ggplot2::coord_cartesian(ylim=yUser)
+if(!is.null(layout))gg0 <- gg0 + ggplot2::facet_grid(layout)
 gg0
 }
 

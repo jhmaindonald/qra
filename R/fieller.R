@@ -78,6 +78,7 @@
 #'
 #' @rdname fieller
 #' @export
+#'
 fieller <-
   function (phat, b, vv, df.t = Inf, offset = 0, logscale = FALSE,
             link = "logit", eps=0, type=c("Fieller","Delta"), maxg=0.99)

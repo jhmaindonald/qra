@@ -84,10 +84,16 @@ corresponding slopes.  These replace the arguments `nEsts`
 (subscripts for slopes were `(nEsts+1):(nEsts+slopeAdd)`).
 }
 \examples{
-form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
-codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
-  family=glmmTMB::betabinomial(link='cloglog'),
-  dispformula=~0+Cultivar/splines::ns(dose,2),
-  data=subset(codling1989,dose>0))
-round(qra::extractLT(codling1989.TMB, a=1:3, 4:6),1)
+form <- cbind(Dead,Live)~0+trtGp/TrtTime+(1|trtGpRep)
+HawMed <- droplevels(subset(HawCon, CN=="MedFly"))
+HawMed <- within(HawMed,
+                 {trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
+                 trtGpRep <- paste0(CN,LifestageTrt,":",RepNumber)
+                 scTime <- scale(TrtTime) })
+HawMedbb.cll <- glmmTMB::glmmTMB(form, dispformula=~trtGp+splines::ns(scTime,2),
+                                 family=glmmTMB::betabinomial(link="cloglog"),
+                                 data=HawMed)
+round(qra::extractLT(p=0.99, obj=HawMedbb.cll, link="cloglog",
+               a=1:4, b=5:8, eps=0, df.t=NULL)[,-2], 2)
+
 }

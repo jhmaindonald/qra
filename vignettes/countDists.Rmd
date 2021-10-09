@@ -30,6 +30,27 @@ read_chunk("discrete-code.R")
 
 ```{r set-lattice, echo=FALSE}
 ```
+```{r echo=FALSE}
+if("lme4" %in% (.packages()))
+  detach("package:lme4", unload=TRUE)
+req_suggested_packages <- c("gamlss")
+noneMiss <- suppressMessages(requireNamespace('gamlss', quietly = TRUE))
+nogamlss <- !noneMiss
+if (nogamlss) {
+   message("This vignette requires the `gamlss` package, that is not available/installed.")
+message("Code that requires this package will not be executed.")
+}
+```
+
+```{r, include = FALSE}
+op <- options(width=90)
+knitr::opts_chunk$set(
+  collapse = TRUE
+)
+
+```
+
+<!-- https://lbusett.netlify.app/post/building-a-website-with-pkgdown-a-short-guide/ -->
 
 # Models for Binary Responses
 
@@ -297,6 +318,10 @@ with `size` $n$ =10, and probability $\pi$ = 0.5, with the
 dispersion parameter in each case chosen so that the dispersion 
 factor is $\Phi = 2.0$ in Panel A, and $\Phi = 4.75$ in Panel B.
 
+```{r gamlss-check, echo=FALSE, eval=nogamlss}
+message("Subsequent code that requires `gamlss` will not be executed.")
+```
+
 ```{r gamlss, echo=FALSE}
 ```
 
@@ -312,7 +337,7 @@ in both panels.  As $\\Phi$ increases, the change in shape needed
 to accomodate the increased variance becomes more extreme."  
 ```
 
-```{r cfDBI-BB, fig.width=9, fig.height=4, echo=FALSE, out.width='95%', fig.show='hold', fig.cap=cap2}
+```{r cfDBI-BB, fig.width=9, fig.height=4, echo=FALSE, out.width='95%', fig.show='hold', fig.cap=cap2, eval=noneMiss}
 ```
 
 Note also the correlated binomial, implemented in the 
@@ -385,12 +410,18 @@ The Panel A data are the numbers of heads in 200 sets of ten coin tosses:
 ```{r htab, echo=FALSE}
 htab
 ```
+The data can be obtained from the `testDriveR` package, thus
+```{r GetbinData, eval=FALSE, echo=1:4}
+```
 
 The Panel B data are the numbers of diseased plants, out of 6, in 62 
 field quadrats.
 
 ```{r tastab, echo=FALSE}
 tastab
+```
+The data can be obtained from the `testDriveR` package, thus
+```{r GetbinData, eval=FALSE, echo=5:6}
 ```
 
 For data such as here, a poor fit to a binomial model is 
@@ -407,7 +438,7 @@ The fit is in each case handled as a special case of fitting a
 regression model. The only parameter is a location parameter 
 --- hence the `~1`.
 
-```{r cfFits, message=FALSE, echo=TRUE}
+```{r cfFits, message=FALSE, echo=TRUE, eval=noneMiss}
 ```
 
 Now examine, and compare, diagnostic plots for the binomial
@@ -432,7 +463,7 @@ with the dotted curves marking out 95% confidence bounds."
 ```
 
 
-```{r cfsim, out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap4}
+```{r cfsim, out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap4, eval=noneMiss}
 ```
 
 Figure \@ref(fig:cfq2) shows diagnostic plots for a 
@@ -443,7 +474,7 @@ cap5 <- "Diagnostic plots of randomized quantile residuals, for
 a __betabinomial__ model fitted to the plant disease data."
 ```
 
-```{r cfq2,  out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap5}
+```{r cfq2,  out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap5, eval=noneMiss}
 ```
 
 The worm plots give the clearest picture.  Figure \@ref(fig:cfsim)B
@@ -474,7 +505,7 @@ have been fitted -- the binomial, the betabinomial,
 and the double binomial (for which diagnostic plots
 have not been shown.) The values given in the `dAIC`
 column are increases from the best fitting model.
-```{r cf-AIC}
+```{r cf-AIC, eval=noneMiss}
 ```
 
 The comparison favors the betabinomial, by a smallish margin.
@@ -496,7 +527,7 @@ the sampling distribution of the mean close to the normal.
 
 Data from large families indicates that variation in the
 proportion of males is greater than would be expected for a
-binomial distribution.  The dataset `fitODBOD::Male_Children`,
+binomial distribution.  The dataset `qra::malesINfirst12`,
 from hospital records in Saxony in the nineteenth century, gives
 the number of males among the first 12 children of family size 13
 in 6115 families. The probability that a child will be male
@@ -509,7 +540,7 @@ non-randomly stopping when a desired gender is reached.) Data is:
 
 The following fits the model with binomial errors.
 
-```{r cfMales, echo=1:2}
+```{r cfMales, echo=1:2, eval=noneMiss}
 ```
 For the betabinomial (`doBB`), replace `family=BI` by `family=BB`. 
 For the double binomial (`doDBI`), replace `family=BI` by `family=DBI`. 
@@ -517,7 +548,7 @@ For the double binomial (`doDBI`), replace `family=BI` by `family=DBI`.
 Fitted probabilities for the betabinomial can, if required, be 
 calculated and added to the data frame `maleFit` thus:
 
-```{r binFitProbs, echo=1:3}
+```{r binFitProbs, echo=1:3, eval=noneMiss}
 ```
 
 The code can be modified in the obvious way to add fitted values
@@ -530,7 +561,7 @@ cap6 <- "Data, from hospital records in Saxony in the nineteenth century, gave t
 Figure \@ref(fig:rqmales) shows worm plots for the binomial
 and betabinomial models:
 
-```{r rqmales, out.width='85%', fig.width=8.4, fig.height=3.1, echo=FALSE,  fig.show='hold', fig.cap=cap6}
+```{r rqmales, out.width='85%', fig.width=8.4, fig.height=3.1, echo=FALSE,  fig.show='hold', fig.cap=cap6, eval=noneMiss}
 ```
 
 The Panel A plot, with points all lying close to a line, indicates
@@ -546,7 +577,7 @@ generated.
 
 AIC statistics for the three models are:
 
-```{r cf-AIC-males, echo=FALSE}
+```{r cf-AIC-males, echo=FALSE, eval=noneMiss}
 ```
 The double binomial is by a small and inconsequential
 margin the preferred model.
@@ -647,7 +678,7 @@ cap8 <- "Worm plots for the Poisson, for the zero-inflated Poisson,
 and for the negative binomial."
 ```
 
-```{r wormpois, out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap8}
+```{r wormpois, out.width='99%', fig.width=8.0, fig.height=2.5, echo=FALSE, fig.show='hold', fig.cap=cap8}
 ```
 
 The following demonstrates the calculation of the fitted frequencies
@@ -662,6 +693,7 @@ relative numbers of frequencies 1, 2 and 3 badly wrong.
 # References {-}
 
 ```{r exit, echo=FALSE}
+options(oldopt)
 knitr::knit_exit()
 ```
 
