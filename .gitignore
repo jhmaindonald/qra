@@ -3,3 +3,5 @@ inst/doc
 vignettes/Untitled*
 .DS_Store
 id_rsa.pub
+.Rhistory
+checkNote

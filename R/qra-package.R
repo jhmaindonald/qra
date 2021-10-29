@@ -20,7 +20,7 @@
 #' See \code{\link{fpower}}.
 #'
 #' \code{extractLT}: Obtains complete set of LT or LD estimate, when it is
-#' convenient to get results from several models at the same time.
+#' convenient to get results from several models at the same time.
 #'
 #' \code{foldp}: Calculates the ratio of \code{p+eps} to \code{1-code+eps}
 #'

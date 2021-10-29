@@ -67,9 +67,6 @@ print(probrange, quote=FALSE, right=TRUE)
 ## ---- u2q ----
 round(qnorm(c(0.2,0.5,0.8)), 2)
 
-## ---- gamlss ----
-PKGgamlss <- suppressPackageStartupMessages(require(gamlss))
-
 ## ---- cfDBI-BB ----
 if(PKGgamlss){
 x <- 0:10
@@ -190,7 +187,7 @@ htab <- table(factor(
   sapply(split(qra::kerrich,
                rep(1:200,rep(10,200))),sum), levels=0:10),
   dnn=list("A: Frequency of each of 0 to 10, in 10 tosses"))
-tastab <- table(factor(qra::ray_blight, levels=0:6),
+tastab <- table(factor(qra::rayBlight, levels=0:6),
                 dnn=list("B: Frequency of each of 0 to 6, in 6 plants"))
 
 ## ---- binAB ----
@@ -326,17 +323,9 @@ aicStat$dAIC <- with(aicStat, round(AIC-AIC[1],1))
 aicStat
 
 ## ---- countdata ----
-pkgVGAM <- requireNamespace("VGAM")
-if(pkgVGAM){
-## Radioactive count data
-ruge <- VGAM::ruge
-## Machinist accidents
-machinists <- VGAM::machinists
-} else {
 ruge <- data.frame(counts=c(57,203,383,525,532,408,273,139,45,27,10,4,0,1,1),
                    number=0:14)
 machinists <- data.frame(accidents=c(0:6,8), ofreq=c(296,74,26,8,4,4,1,1))
-}
 
 ## ---- ruge ----
 ## Numbers of scintillations in 2608 1/8 minute intervals

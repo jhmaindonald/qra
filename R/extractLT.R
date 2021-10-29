@@ -7,10 +7,10 @@
 #'
 #' @details Fixed coefficients from \code{obj} must be for intercepts and
 #' for slopes.  Starting the model formula with \code{0+} will commonly
-#' do what is required. The coefficients \code{fixef(obj)[a]} are assumed
-#' to specify line intercepts, while \code{fixef(obj)[b] specify the
+#' do what is required. The coefficients \code{fixef(obj)[a]} are assumed
+#' to specify line intercepts, while \code{fixef(obj)[b]} specify the
 #' corresponding slopes.  These replace the arguments \code{nEsts}
-#' (subscripts for intercepts were \code{1:nEsts) and \code{slopeAdd}
+#' (subscripts for intercepts were \code{1:nEsts)} and \code{slopeAdd}
 #' (subscripts for slopes were \code{(nEsts+1):(nEsts+slopeAdd)}).
 #'
 #' @param obj \code{merMod} object, created using \code{lmer()} or
@@ -19,8 +19,8 @@
 #' @param b Subscripts for corresponding slopes.
 #' @param link Link function, for use with objects where no
 #' link was specified in the function call, but it is required
-#' to back-transform a transformation that was performed prior
-#' to the function call.  Otherwise leave as \code{link=NULL}, and
+#' to back-transform a transformation that was performed prior
+#' to the function call.  Otherwise leave as \code{link=NULL}, and
 #' the link function will be extracted as \code{family(obj)[['link']]}.
 #' For a folded power function, with \code{extractLTpwr()}, the only
 #' available link is \code{fpower}, and the exponent \code{lambda} must be
@@ -41,11 +41,11 @@
 #'
 #' @return Matrix holding LD or LD estimates.
 #' @examples
-#' pcheck <- suppressWarnings(requireNamespace(pkg, quietly = TRUE))
+#' pcheck <- suppressWarnings(requireNamespace("glmmTMB", quietly = TRUE))
 #' if(pcheck) pcheck & packageVersion("glmmTMB") >= "1.1.2"
 #' if(pcheck){
 #' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(1|trtGpRep)
-#' HawMed <- droplevels(subset(HawCon, CN=="MedFly"))
+#' HawMed <- droplevels(subset(HawCon, CN=="MedFly"&LifestageTrt!="Egg"))
 #' HawMed <- within(HawMed,
 #'                  {trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
 #'                  trtGpRep <- paste0(CN,LifestageTrt,":",RepNumber)
@@ -54,8 +54,8 @@
 #'                                  family=glmmTMB::betabinomial(link="cloglog"),
 #'                                  data=HawMed)
 #' round(qra::extractLT(p=0.99, obj=HawMedbb.cll, link="cloglog",
-#'                a=1:4, b=5:8, eps=0, df.t=NULL)[,-2], 2)} else
-#' message("Example requites `glmmTMB` version >= 1.1.2: not available")
+#'                a=1:3, b=4:6, eps=0, df.t=NULL)[,-2], 2)} else
+#' message("Example requires `glmmTMB` version >= 1.1.2: not available")
 #'
 #' @export
 #'

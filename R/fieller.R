@@ -4,7 +4,7 @@
 #' interval for a specified mortality proportion, commonly
 #' 0.50, or 0.90, or 0.99.  Here "dose" is a generic term for
 #' any measure of intensity of a treatment that is designed
-#' to induce insect death.
+#' to induce insect death.
 #'
 #' @details See the internal code for details of the value \code{g}.
 #' The calculation gives increasing wide confidence intervals as
@@ -39,8 +39,8 @@
 #'    Delta (\code{type="Delta"}) method, which relies on a first
 #'    order Taylor series approximation to the variance, is
 #'    provided so that it can be used for comparative purposes.
-#'    It can be reliably used only in cases where the interval
-#'    has been shown to be essentially the same as given by
+#'    It can be reliably used only in cases where the interval
+#'    has been shown to be essentially the same as given by
 #'    \code{type="Fieller"}!
 #' @param maxg Maximum value of \code{g} for which a
 #' confidence interval will be calculated. Must be \code{< 1}.

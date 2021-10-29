@@ -34,8 +34,8 @@ read_chunk("discrete-code.R")
 if("lme4" %in% (.packages()))
   detach("package:lme4", unload=TRUE)
 req_suggested_packages <- c("gamlss")
-noneMiss <- suppressMessages(requireNamespace('gamlss', quietly = TRUE))
-nogamlss <- !noneMiss
+PKGgamlss <- suppressMessages(require('gamlss', quietly = TRUE))
+nogamlss <- !PKGgamlss
 if (nogamlss) {
    message("This vignette requires the `gamlss` package, that is not available/installed.")
 message("Code that requires this package will not be executed.")
@@ -47,7 +47,6 @@ op <- options(width=90)
 knitr::opts_chunk$set(
   collapse = TRUE
 )
-
 ```
 
 <!-- https://lbusett.netlify.app/post/building-a-website-with-pkgdown-a-short-guide/ -->
@@ -313,16 +312,15 @@ multiplier for the binomial variance:
 \sigma = \frac{\Phi-1}{n - \Phi}; \qquad \Phi = 1 + \frac{(n-1)\sigma}{\sigma+1}
 \]
 
-Figure \@ref(fig:cfDBI-BB) compares the binomial distribution 
+
+
+Figure `r if(PKGgamlss) paste("\\@ref(fig:cfDBI-BB)")` compares the binomial distribution 
 with `size` $n$ =10, and probability $\pi$ = 0.5, with the 
 dispersion parameter in each case chosen so that the dispersion 
 factor is $\Phi = 2.0$ in Panel A, and $\Phi = 4.75$ in Panel B.
 
 ```{r gamlss-check, echo=FALSE, eval=nogamlss}
 message("Subsequent code that requires `gamlss` will not be executed.")
-```
-
-```{r gamlss, echo=FALSE}
 ```
 
 ```{r cap2, echo=FALSE}
@@ -337,7 +335,7 @@ in both panels.  As $\\Phi$ increases, the change in shape needed
 to accomodate the increased variance becomes more extreme."  
 ```
 
-```{r cfDBI-BB, fig.width=9, fig.height=4, echo=FALSE, out.width='95%', fig.show='hold', fig.cap=cap2, eval=noneMiss}
+```{r cfDBI-BB, fig.width=9, fig.height=4, echo=FALSE, out.width='95%', fig.show='hold', fig.cap=cap2, eval=PKGgamlss}
 ```
 
 Note also the correlated binomial, implemented in the 
@@ -368,7 +366,8 @@ Pearson chi-squared statistic.  For the betabinomial, the multiplier
 is $\Phi = 1+(n-1)\rho$, i.e., it increases with $n$.  This is an
 important difference.
 
-Figure \@ref(fig:cfDBI-BB) highlighted the extent to which the
+Figure `r if(PKGgamlss) paste("\\@ref(fig:cfDBI-BB)")` 
+highlighted the extent to which the
 assumption of a distribution that has a binomial-like shape
 will be seriously wrong, if the dispersion index $\Phi$ is
 substantially greater than one.  Whatever the distribution,
@@ -438,7 +437,7 @@ The fit is in each case handled as a special case of fitting a
 regression model. The only parameter is a location parameter 
 --- hence the `~1`.
 
-```{r cfFits, message=FALSE, echo=TRUE, eval=noneMiss}
+```{r cfFits, message=FALSE, echo=TRUE, eval=PKGgamlss}
 ```
 
 Now examine, and compare, diagnostic plots for the binomial
@@ -451,8 +450,8 @@ medians are shown as solid black dots.
 Panel B (a 'worm plot') is a detrended version of Panel A,
 with the dashed curves marking out 95% confidence bounds.
 
-Figure \@ref(fig:cfsim) shows diagnostic plots for a 
-binomial distribution:
+Figure `r if(PKGgamlss) paste("\\@ref(fig:cfsim)")` shows 
+diagnostic plots for a binomial distribution:
 
 ```{r cap4, echo=FALSE}
 cap4 <- "Diagnostic plots of randomized quantile residuals
@@ -463,24 +462,27 @@ with the dotted curves marking out 95% confidence bounds."
 ```
 
 
-```{r cfsim, out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap4, eval=noneMiss}
+```{r cfsim, out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap4, eval=PKGgamlss}
 ```
 
-Figure \@ref(fig:cfq2) shows diagnostic plots for a 
-betabinomial distribution:
+Figure `r if(PKGgamlss) paste("\\@ref(fig:cfq2)")` shows 
+diagnostic plots for a betabinomial distribution:
 
 ```{r cap5, echo=FALSE}
 cap5 <- "Diagnostic plots of randomized quantile residuals, for
 a __betabinomial__ model fitted to the plant disease data."
 ```
 
-```{r cfq2,  out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap5, eval=noneMiss}
+```{r cfq2,  out.width='98%', fig.width=7.0, fig.height=2.25, echo=FALSE, fig.show='hold', fig.cap=cap5, eval=PKGgamlss}
 ```
 
-The worm plots give the clearest picture.  Figure \@ref(fig:cfsim)B
-makes it clear that the data is not binomial, while Figure
-\@ref(fig:cfq2)B indicates that the data are broadly consistent 
-with a betabinomial distribution. 
+`r if(PKGgamlss) paste("\\@ref(fig:cfq2)")`
+The worm plots give the clearest picture.  Figure 
+`r if(PKGgamlss) paste("\\@ref(fig:cfsim)B")` makes it clear 
+that the data is not binomial, while Figure
+`r if(PKGgamlss) paste("\\@ref(fig:cfq2)B")` indicates 
+that the data are broadly consistent with a betabinomial 
+distribution. 
 
 Code is:
 ```{r cfsim, eval=FALSE, echo=c(2,3,5,7), ref.label=c('cfsim','cfq2')}
@@ -505,7 +507,7 @@ have been fitted -- the binomial, the betabinomial,
 and the double binomial (for which diagnostic plots
 have not been shown.) The values given in the `dAIC`
 column are increases from the best fitting model.
-```{r cf-AIC, eval=noneMiss}
+```{r cf-AIC, eval=PKGgamlss}
 ```
 
 The comparison favors the betabinomial, by a smallish margin.
@@ -540,7 +542,7 @@ non-randomly stopping when a desired gender is reached.) Data is:
 
 The following fits the model with binomial errors.
 
-```{r cfMales, echo=1:2, eval=noneMiss}
+```{r cfMales, echo=1:2, eval=PKGgamlss}
 ```
 For the betabinomial (`doBB`), replace `family=BI` by `family=BB`. 
 For the double binomial (`doDBI`), replace `family=BI` by `family=DBI`. 
@@ -548,7 +550,7 @@ For the double binomial (`doDBI`), replace `family=BI` by `family=DBI`.
 Fitted probabilities for the betabinomial can, if required, be 
 calculated and added to the data frame `maleFit` thus:
 
-```{r binFitProbs, echo=1:3, eval=noneMiss}
+```{r binFitProbs, echo=1:3, eval=PKGgamlss}
 ```
 
 The code can be modified in the obvious way to add fitted values
@@ -558,10 +560,10 @@ for the binomial and/or the double binomial.
 cap6 <- "Data, from hospital records in Saxony in the nineteenth century, gave the number of males among the first 12 children in families of size 13, in 6115 families. Panel A shows a worm plot for the model that fitted a binomial distribution.  Panel B repeats the worm plot, now for the model that fitted a betabinomial distribution."
 ```
 
-Figure \@ref(fig:rqmales) shows worm plots for the binomial
-and betabinomial models:
+Figure `r if(PKGgamlss) paste("\\@ref(fig:rqmales)")` shows worm 
+plots for the binomial and betabinomial models:
 
-```{r rqmales, out.width='85%', fig.width=8.4, fig.height=3.1, echo=FALSE,  fig.show='hold', fig.cap=cap6, eval=noneMiss}
+```{r rqmales, out.width='85%', fig.width=8.4, fig.height=3.1, echo=FALSE,  fig.show='hold', fig.cap=cap6, eval=PKGgamlss}
 ```
 
 The Panel A plot, with points all lying close to a line, indicates
@@ -577,7 +579,7 @@ generated.
 
 AIC statistics for the three models are:
 
-```{r cf-AIC-males, echo=FALSE, eval=noneMiss}
+```{r cf-AIC-males, echo=FALSE, eval=PKGgamlss}
 ```
 The double binomial is by a small and inconsequential
 margin the preferred model.
@@ -604,7 +606,8 @@ poisson counts, for two datasets.
 
 ```{r countdata, eval=TRUE, echo=FALSE}
 ```
-The first set of counts are the @rutherford1908electrical polonium radioactive decay counts that give the number of scintillations in 2608 1/8 minute intervals.
+The first set of counts are the @rutherford1910lxxvi polonium radioactive decay counts that give the number of scintillations in 2608 1/8 minute intervals.
+
 ```{r ruge, echo=F}
 ```
 
@@ -678,7 +681,7 @@ cap8 <- "Worm plots for the Poisson, for the zero-inflated Poisson,
 and for the negative binomial."
 ```
 
-```{r wormpois, out.width='99%', fig.width=8.0, fig.height=2.5, echo=FALSE, fig.show='hold', fig.cap=cap8}
+```{r wormpois, out.width='99%', fig.width=8.0, fig.height=2.5, echo=FALSE, fig.show='hold', fig.cap=cap8, eval=PKGgamlss}
 ```
 
 The following demonstrates the calculation of the fitted frequencies

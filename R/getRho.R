@@ -17,11 +17,21 @@
 #' \eqn{\rho}, else (\code{varMult==TRUE})  return
 #' \code{list(rho, mult)}.
 #' @examples
-#' form <- cbind(dead,total-dead)~0+Cultivar/dose+(1|cultRep)
-#' codling1989.TMB <- glmmTMB::glmmTMB(formula=form,
-#'   family=glmmTMB::betabinomial(link='cloglog'),
-#'   dispformula=~0+Cultivar/splines::ns(dose,2), data=qra::codling1989)
-#' rho <- getRho(codling1989.TMB)
+#' pcheck <- suppressWarnings(requireNamespace("glmmTMB", quietly = TRUE))
+#' if(pcheck) pcheck & packageVersion("glmmTMB") >= "1.1.2"
+#' if(pcheck){
+#' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(1|trtGpRep)
+#' HawMed <- droplevels(subset(HawCon, CN=="MedFly"&LifestageTrt!="Egg"))
+#' HawMed <- within(HawMed,
+#'                  {trtGp <- factor(paste0(CN,LifestageTrt, sep=":"))
+#'                  trtGpRep <- paste0(CN,LifestageTrt,":",RepNumber)
+#'                  scTime <- scale(TrtTime) })
+#' HawMedbb.TMB <- glmmTMB::glmmTMB(form, dispformula=~trtGp+splines::ns(scTime,2),
+#'                                  family=glmmTMB::betabinomial(link="cloglog"),
+#'                                  data=HawMed)
+#' rho <- qra::getRho(HawMedbb.TMB)} else
+#' message("Example requires `glmmTMB` version >= 1.1.2: not available")
+#'
 #' @importFrom stats model.matrix model.frame
 #' @export
 getRho <- function(obj, varMult=FALSE){

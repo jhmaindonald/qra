@@ -237,7 +237,7 @@ if(pcheck) pcheck & packageVersion("glmmTMB") >= "1.1.2"
 if(!pcheck){
   message("`glmmTMB` version >= 1.1.2 is not available")
   message("Will not continue execution of vignette")
-  knit_exit()
+  knitr::knit_exit()
   }
 ```
 
@@ -1184,74 +1184,6 @@ presents results of analyses from relevant trial data,
 and a very limited literature that makes comparisons 
 across a number of different datasets, few of the 
 relevant datasets are available in the public domain.
-
-<!-- ## Slope Versus Intercept Plot -->
-
-<!-- ```{r ab-cap} -->
-<!-- cap11 <- "Slope versus intercept plot.  The intercept is a difference -->
-<!-- from the mean. Contour lines have been added for constant LT99=11 days -->
-<!-- (labeled with Es), LT99=9 days (labeled with 9s), and LT99=7 days -->
-<!-- (labeled with 7s)." -->
-<!-- ``` -->
-
-<!-- Attention is limited to the linear mixed model. 90% confidence ellipses -->
-<!-- are added. -->
-
-<!-- ```{r HawCon-print, fig.width=6.5, fig.height=5, out.width="75%", message=FALSE, warning=FALSE, fig.cap=cap11, eval=TRUE} -->
-<!-- ## Extract variance-covariance matrix for estimates -->
-<!-- ellipseFun <- function(which.coef=c(3,nFits+3), center, varmat, level=0.9, nFits, dfd){ -->
-<!--   rad <- sqrt(2 * qf(level, 2, dfd)) -->
-<!-- car::ellipse(center=center[which.coef], -->
-<!--              shape=varmat[which.coef,which.coef], -->
-<!--              radius=rad, center.pch=1, col="gray") -->
-<!-- } -->
-<!-- ests <- fixef(modX.rlmer) -->
-<!-- names(ests) <- substring(names(ests),6) -->
-<!-- vv <- as.matrix(vcov(modX.rlmer)) -->
-<!-- ab <- matrix(ests, ncol=2) -->
-<!-- nFits <- nrow(ab) -->
-<!-- rnam <- names(ests[1:nFits]) -->
-<!-- dimnames(ab) <- list(rnam, c("Intercept", "Slope")) -->
-<!-- plot(ab, xlab="Intercept", ylab="Slope") -->
-<!-- posn <- 2 + 2*(ab[,1]<median(ab[,1])) -->
-<!-- text(ab, labels=rnam, pos=posn) -->
-<!-- ellipseFun(which.coef=c(7,nFits+7), center=ests, varmat=vv, nFits=nFits, dfd=2*nFits) -->
-<!-- ellipseFun(which.coef=c(3,nFits+3), center=ests, varmat=vv, nFits=nFits, dfd=2*nFits) -->
-<!-- ellipseFun(which.coef=c(4,nFits+4), center=ests, varmat=vv, nFits=nFits, dfd=2*nFits) -->
-<!-- ellipseFun(which.coef=c(5,nFits+5), center=ests, varmat=vv, nFits=nFits, dfd=2*nFits) -->
-<!-- xy <- data.frame(a = pretty(ab[,1],20)) -->
-<!-- linkfun <- make.link('logit')[['linkfun']] -->
-<!-- xy[['b11']] <- (-xy[[1]]+linkfun(0.99))/(11-ascale) -->
-<!-- xy[['b9']] <- (-xy[[1]]+linkfun(0.99))/(9-ascale) -->
-<!-- xy[['b7']] <- (-xy[[1]]+linkfun(0.99))/(7-ascale) -->
-<!-- lines(xy[,c("a","b11")], lty=2, type="b", pch="E", col=2) -->
-<!-- lines(xy[,c("a","b9")], lty=2, type="b", pch="9", col=2) -->
-<!-- lines(xy[,c("a","b7")], lty=2, type="b", pch="7", col=2) -->
-<!-- ``` -->
-
-<!-- ## Hotelling T^2^ -->
-<!-- The following uses a Hotelling T^2^ test to compare the means -->
-<!-- in the cases where the two ellipses (medFly L1 and MedFly L3) -->
-<!-- are closest to touching. The following requires careful checking. -->
-<!-- The $p$-value should be adjusted upwards for the number of -->
-<!-- comparisons made. -->
-<!-- ```{r T2,eval=TRUE} -->
-<!-- ## Variance-covariance matrix for difference of intercepts, -->
-<!-- ## and difference of slopes -->
-<!-- dmat <- matrix(0, nrow=2, ncol=2*nFits) -->
-<!-- dmat[1,c(5, nFits+5)] <- 1 -->
-<!-- dmat[2,c(4, nFits+4)] <- -1 -->
-<!-- v <- dmat%*%vv%*%t(dmat) -->
-<!-- d <- ests[c(5,nFits+5)]-ests[c(4,nFits+4)] -->
-<!-- ## T2 statistic for comparing the two bivariate means -->
-<!-- T2 <- as.vector(d%*%solve(v)%*%d) -->
-<!-- ## Equivalent approx F-statistic -->
-<!-- F2 <- T2 * 2*nFits/(2*nFits-2) -->
-<!-- print(1-pf(F2,2,2*nFits-2), digits=3) -->
-<!-- ``` -->
-
-<!-- On Hotelling T^2^, see, e.g., -->
-<!-- https://en.wikipedia.org/wiki/Hotelling%27s_T-squared_distribution#Statistic -->
 
 # References
 

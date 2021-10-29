@@ -8,3 +8,4 @@ id_rsa.pub
 log$
 ^vignettes/Untitled\.Rmd$
 ^vignettes/Untitled1\.Rmd$
+checkNote
