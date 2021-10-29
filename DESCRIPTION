@@ -34,6 +34,8 @@ Imports: lme4, splines, ggplot2
 Suggests: fitODBOD, VGAM, glmmTMB (>= 1.1.2),
     gamlss, prettydoc, DHARMa, kableExtra (>= 1.2), 
     plotrix, dfoptim, optimx, bookdown
+URL: https://github.com/jhmaindonald/qra
+BugReports: https://github.com/jhmaindonald/qra/issues
 VignetteBuilder: knitr, rmarkdown, bookdown, prettydoc
 LazyData: TRUE
 RoxygenNote: 7.1.1

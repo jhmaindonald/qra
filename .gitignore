@@ -1,7 +1,8 @@
 inst/doc
 .Rproj.user
 vignettes/Untitled*
+R/untitled*
 .DS_Store
 id_rsa.pub
 .Rhistory
-checkNote
+checkNote*
