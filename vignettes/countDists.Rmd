@@ -1,7 +1,7 @@
 ---
-title: "Distributions for Quantal Responses"
+title: "Distributions for Binomial-like and Poisson-like Counts"
 author: "John Maindonald"
-date: "19/10/2020"
+date: "`r format(Sys.Date(),'%d %B %Y')`"
 output:
   bookdown::html_document2:
     theme: cayman
@@ -14,7 +14,7 @@ output:
     link-citations: true
 bibliography: qra.bib
 vignette: >
-  %\VignetteIndexEntry{Distributions for Quantal Responses}
+  %\VignetteIndexEntry{Distributions for Binomial-like and Poisson-like Counts}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -136,19 +136,17 @@ that gives the number of `successes.
 The inverse function to `pbinom()` is `qbinom()`.
 This takes as first argument a cumulative probability `p`, 
 and returns the smallest value of $x$ such that 
-`pbinom(p)` $\leq$ `p`.
+`pbinom(x)` $\leq$ `p`.
+Thus it returns:
+
+* 0 for any $p \leq 0.125$
+* 1 for $0.125 < p \leq 0.5$
+* 2 for $0.5 < p \leq 0.875$
+* 3 for $0.875 < p \leq 1.0$
+
+In particular:
 ```{r binom-q, echo=FALSE}
 ```
-The result is unchanged if
-
-* 0.125 is replaced by 0, or by any quantity between 0 and 0.125  
-* 0.5 is replaced by 0.126, or by any quantity $>$0.125 and $\leq$ 0.5  
-* 0.875 by 0.501, or ...
-* 1.0 by 0.876, or ...
-
-The inverse
-function, which determines quantiles, is defined to be 0 for
-any $p \leq 0.125$, stepping up to 1 for $0.875 < p \leq 1.0$.
 Figure \@ref(fig:plot-gph12) shows the (cumulative) distribution
 function, with the quantile function alongside:
 

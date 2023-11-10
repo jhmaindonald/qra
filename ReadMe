@@ -1,20 +1,19 @@
-This git repository holds the source files for the qra package for R.
-At this point (10 May 2018), it is not on CRAN.  The package has utility
-functions and data for use for quantal response analysis, with the
-analysis of insect mortality data from exposure-mortality experiments
-primarily in mind.  "Exposure" may be dose of a fumigant, time in cold
-storage, or another such measure.
+This repository holds the source files for the qra package for R.
+The package has utility functions and data for use for quantal response
+analysis, with the analysis of insect mortality data from exposure-mortality
+experiments primarily in mind.  "Exposure" may be dose of a fumigant, time
+in cold storage, or another such measure.
 
 This development version can be installed using the
-`install_git()` function from the `devtools` package, thus:
+`install_github()` function from the `devtools` package, thus:
 ```
-devtools::install_git('https://gitlab.com/daagur/qra.git')
+devtools::install_github(jhmaindonald/qra}}
 ```
 
 Use the available options for `install.packages()` as required, e.g.,
 to ensure that vignettes are built (by default, they are not:)
 ```
-devtools::install_git('https://gitlab.com/daagur/qra.git',build_vignettes=TRUE)
+devtools::install_github(jhmaindonald/qra, build_vignettes=TRUE)
 ```
 
 One may want to specify `upgrade_dependencies = FALSE`, and attend separately

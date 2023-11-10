@@ -22,7 +22,9 @@ graphSum(
   xzeroOffsetFrac = 0.08,
   yzeroOneOffsets = c(-0.08, 0.08),
   yEps = 0.005,
-  xlab = expression(bold("CT ") * "(gm.h." * m^{     -3 } * ")"),
+  xlab = expression(bold("CT ") * "(gm.h." * m^{
+     -3
+ } * ")"),
   ylabel = NULL,
   ytiklab = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99)
 )

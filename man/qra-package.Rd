@@ -12,7 +12,7 @@ checkDisp,	getRho, extractLT, getScaleCoef, scaleLocAdjust,
 fieller,	gpsWithin, varRatio, foldp,	graphSum, fpower
 }
 \details{
-The three vignettes provide examples of the use of the functions.
+Vignettes provide examples of the use of the functions.
 }
 \section{qra functions}{
 
@@ -54,6 +54,14 @@ of comparison, to make it easy to show how poor the approximation
 can be, and to warn against its general dewvuse!
 }
 
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jhmaindonald/qra}
+  \item Report bugs at \url{https://github.com/jhmaindonald/qra/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: John Maindonald \email{john@statsresearch.co.nz} (\href{https://orcid.org/0000-0002-0106-9224}{ORCID})
 

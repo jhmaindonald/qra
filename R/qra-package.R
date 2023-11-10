@@ -48,7 +48,7 @@
 #' can be, and to warn against its general dewvuse!
 #'
 #' @details
-#' The three vignettes provide examples of the use of the functions.
+#' Vignettes provide examples of the use of the functions.
 #'
 #' @keywords internal
 "_PACKAGE"
