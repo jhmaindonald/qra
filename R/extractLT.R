@@ -41,8 +41,8 @@
 #'
 #' @return Matrix holding LD or LD estimates.
 #' @examples
-#' pcheck <- suppressWarnings(requireNamespace("glmmTMB", quietly = TRUE))
-#' if(pcheck) pcheck & packageVersion("glmmTMB") >= "1.1.2"
+#' pcheck <- suppressWarnings(requireNamespace("glmmTMB", quietly = TRUE) &&
+#'                            packageVersion("glmmTMB") >= "1.1.2")
 #' if(pcheck){
 #' form <- cbind(Dead,Live)~0+trtGp/TrtTime+(1|trtGpRep)
 #' HawMed <- droplevels(subset(HawCon, CN=="MedFly"&LifestageTrt!="Egg"))
