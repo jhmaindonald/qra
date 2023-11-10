@@ -38,4 +38,4 @@ URL: https://github.com/jhmaindonald/qra
 BugReports: https://github.com/jhmaindonald/qra/issues
 VignetteBuilder: knitr, rmarkdown, bookdown, prettydoc
 LazyData: TRUE
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
