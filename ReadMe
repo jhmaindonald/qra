@@ -1,7 +1,13 @@
 This repository holds the source files for the qra package for R.
+<<<<<<< HEAD
 The package has utility functions and data for use for quantal response
 analysis, with the analysis of insect mortality data from exposure-mortality
 experiments primarily in mind.  "Exposure" may be dose of a fumigant, time
+=======
+The package has utility functions and data for use for quantal response 
+analysis, with the analysis of insect mortality data from exposure-mortality 
+experiments primarily in mind.  "Exposure" may be dose of a fumigant, time 
+>>>>>>> 604be7362cebff9b9f2a47be99e3f46bc7017974
 in cold storage, or another such measure.
 
 This development version can be installed using the
