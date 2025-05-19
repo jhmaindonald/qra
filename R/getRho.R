@@ -35,7 +35,8 @@
 #' @importFrom stats model.matrix model.frame
 #' @export
 getRho <- function(obj, varMult=FALSE){
-  if(class(obj)!="glmmTMB"){cl <- class(obj)
+  if(!inherits(obj, "glmmTMB")) {
+    cl <- class(obj)
     stop(paste("No provision for object of class",cl))
   }
   mm <- model.matrix(obj$modelInfo$allForm$dispformula,

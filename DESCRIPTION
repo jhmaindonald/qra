@@ -1,8 +1,7 @@
 Package: qra
 Type: Package
 Title: Quantal Response Analysis for Dose-Mortality Data
-Date: 2023-11-11
-Version: 0.2.8
+Version: 0.2.8.1
 Authors@R: 
     c(person(given = "John",
              family = "Maindonald",
