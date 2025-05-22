@@ -12,3 +12,13 @@ NEW FEATURES
 BUG FIXES
   o The default for `scaling` (now `offset`) was 1.0, where
   it should have been 1.
+
+                 Changes in qra version 0.1.28.1 (2018-09-29)
+
+BUG FIXES
+  o Changes from 0.1.28 were made by Ben Bolker
+  o drop dispformula when fitting binomial model in timeMortality vignette
+  o removed explicit date field from DESCRIPTION (gets added automatically during package building)
+  o fixed a couple of scalar comparisons of class(obj) (there are still a few places where a warning is of the form paste("can't handle objects of class", class(obj)), which may give weird results when length(class(obj)) > 1 ...
+
+
